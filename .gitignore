@@ -1,0 +1,54 @@
+# Moodle .gitignore
+
+# Configuration files
+config.php
+config-dist.php
+
+# Data directory
+moodledata/
+
+# Cache and temp files
+cache/
+temp/
+tmp/
+
+# Logs
+error.log
+access.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+
+# Database dumps
+*.sql
+
+# Custom plugins (keep our AI chatbot)
+# local/
+# mod/
+# blocks/
+# themes/
+
+# Keep our custom AI chatbot
+!local/aichatbot/
+
+# PHP files that might contain sensitive data
+phpinfo.php
+test_*.php
+debug_*.php
+setup_*.php
+optimize_*.php
+
+# Environment specific
+.env
+.env.local
