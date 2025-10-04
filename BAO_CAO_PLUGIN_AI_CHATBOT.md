@@ -404,17 +404,13 @@ function detect_subject_from_course($course) {
 
 3. **Tích hợp sâu hơn với Moodle:**
    - Tích hợp với hệ thống quiz
-   - Tích hợp với gradebook
-   - Tích hợp với forum discussions
 
 ### 5.2 Giai đoạn 3 - Tối ưu
 1. **Hiệu suất và bảo mật:**
    - Caching system
    - Rate limiting
-   - Data privacy compliance
 
 2. **Tính năng nâng cao:**
-   - Voice chat
    - Image analysis
    - Multi-language support
 
@@ -422,5 +418,6 @@ function detect_subject_from_course($course) {
 
 **Sinh viên thực hiện:** Hoàng Nhật Linh, Huỳnh Nga  
 **CBHD:** PGS. TS. Thoại Nam, TS. Nguyễn Quang Hùng
+
 
 
