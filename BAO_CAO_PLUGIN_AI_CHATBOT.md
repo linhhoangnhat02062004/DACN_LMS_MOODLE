@@ -133,28 +133,259 @@ Mỗi loại câu hỏi có cấu trúc trả lời riêng biệt để đảm b
 
 ## 4. KIẾN TRÚC HỆ THỐNG
 
-### 4.1 Luồng xử lý tin nhắn
+### 4.1 Tổng quan kiến trúc
+
+Hệ thống AI Chatbot được xây dựng theo kiến trúc **3-tier** với các thành phần chính:
 
 ```
-1. User gửi tin nhắn → index.php
-2. JavaScript gọi ajax.php
-3. Phân tích câu hỏi (môn học, loại câu hỏi)
-4. Tạo prompt chuyên biệt
-5. Gọi AI API hoặc rule-based response
-6. Trả về kết quả với format đẹp
-7. Hiển thị trong chat interface
+┌─────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER                       │
+├─────────────────────────────────────────────────────────────┤
+│  • Giao diện chat (index.php)                              │
+│  • Floating chatbot widget                                 │
+│  • Responsive UI components                                │
+│  • JavaScript/AJAX handlers                                │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    BUSINESS LOGIC LAYER                     │
+├─────────────────────────────────────────────────────────────┤
+│  • Educational features (educational_features.php)         │
+│  • Subject detection & question classification             │
+│  • Prompt engineering system                               │
+│  • AI response processing                                  │
+│  • Rule-based fallback system                              │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      DATA ACCESS LAYER                      │
+├─────────────────────────────────────────────────────────────┤
+│  • Moodle configuration (get_config)                       │
+│  • AI API integration (Ollama/OpenAI)                      │
+│  • Course context extraction                               │
+│  • User session management                                 │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### 4.2 Cơ chế fallback
-- **Primary:** Gọi AI API (OpenAI/GPT)
-- **Fallback:** Rule-based responses khi API lỗi
-- **Error handling:** Xử lý lỗi mạng, API, timeout
+### 4.2 Kiến trúc chi tiết các thành phần
 
-### 4.3 Bảo mật và hiệu suất
-- **API Key:** Lưu trữ an toàn trong cấu hình Moodle
-- **Timeout:** Giới hạn thời gian gọi API (30s)
-- **Rate limiting:** Có thể mở rộng để giới hạn số lượng request
-- **Caching:** Có thể mở rộng để cache câu trả lời phổ biến
+#### A. Frontend Architecture
+```javascript
+// Cấu trúc JavaScript
+├── Chat Interface (index.php)
+│   ├── Message Display System
+│   ├── Input Handling
+│   ├── Typing Indicators
+│   └── Auto-scroll Management
+│
+├── AJAX Communication
+│   ├── Send Message Handler
+│   ├── Response Processing
+│   ├── Error Handling
+│   └── Loading States
+│
+└── UI Components
+    ├── Responsive Design
+    ├── Markdown Rendering
+    ├── Mobile Optimization
+    └── Accessibility Features
+```
+
+#### B. Backend Architecture
+```php
+// Cấu trúc PHP Backend
+├── Core Handlers
+│   ├── ajax.php (Basic chat)
+│   ├── educational_ajax.php (Advanced features)
+│   └── ollama_handler.php (AI integration)
+│
+├── Educational System
+│   ├── Subject Detection
+│   ├── Question Classification
+│   ├── Prompt Engineering
+│   └── Response Optimization
+│
+├── AI Integration
+│   ├── Ollama API (Primary - localhost:11434)
+│   ├── OpenAI API (Fallback)
+│   ├── Model Management
+│   └── Error Handling
+│
+└── Configuration
+    ├── Settings Management
+    ├── User Preferences
+    ├── Course Context
+    └── Security Settings
+```
+
+### 4.3 Luồng xử lý tin nhắn chi tiết
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   User Input    │───▶│  Frontend JS    │───▶│   AJAX Call     │
+│   (Message)     │    │  (index.php)    │    │  (ajax.php)     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                        │
+                                                        ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  AI Response    │◀───│  AI API Call    │◀───│ Message Analysis│
+│  Processing     │    │ (Ollama/OpenAI) │    │ & Prompt Build  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│ Response Format │    │ Error Handling  │    │ Rule-based      │
+│ & Enhancement   │    │ & Fallback      │    │ Fallback        │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │
+         ▼
+┌─────────────────┐    ┌─────────────────┐
+│ JSON Response   │───▶│ Frontend Update │
+│ to Frontend     │    │ & Display       │
+└─────────────────┘    └─────────────────┘
+```
+
+### 4.4 Hệ thống AI Integration
+
+#### A. Dual AI Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    AI INTEGRATION LAYER                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────┐              ┌─────────────────┐      │
+│  │   OLLAMA API    │              │   OPENAI API    │      │
+│  │ (Primary)       │              │  (Fallback)     │      │
+│  │                 │              │                 │      │
+│  │ • Local Server  │              │ • Cloud Service │      │
+│  │ • Port: 11434   │              │ • GPT Models    │      │
+│  │ • Free Usage    │              │ • API Key       │      │
+│  │ • Privacy Safe  │              │ • Internet Req  │      │
+│  └─────────────────┘              └─────────────────┘      │
+│           │                                │                │
+│           └────────────┬───────────────────┘                │
+│                        ▼                                    │
+│              ┌─────────────────┐                            │
+│              │  AI SELECTOR    │                            │
+│              │  & MANAGER      │                            │
+│              │                 │                            │
+│              │ • Auto-failover │                            │
+│              │ • Load Balance  │                            │
+│              │ • Error Handle  │                            │
+│              └─────────────────┘                            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+
+
+### 4.5 Educational Intelligence System
+
+#### A. Subject Detection Engine
+```php
+// Intelligent Subject Detection
+function detect_subject_from_course($course) {
+    $subjects = [
+        'toán' => ['toán', 'math', 'mathematics', 'algebra'],
+        'lý' => ['lý', 'physics', 'vật lý', 'mechanics'],
+        'hóa' => ['hóa', 'chemistry', 'hóa học', 'organic'],
+        'sinh' => ['sinh', 'biology', 'sinh học', 'genetics'],
+        'tin học' => ['tin', 'computer', 'programming', 'coding'],
+        'tiếng anh' => ['english', 'tiếng anh', 'language', 'grammar']
+    ];
+    
+    // Fuzzy matching algorithm
+    // Context analysis
+    // Confidence scoring
+}
+```
+
+
+
+### 4.6 Prompt Engineering Architecture
+
+#### A. Multi-layered Prompt System
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  PROMPT ENGINEERING SYSTEM                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │  BASE PROMPT    │  │ SUBJECT PROMPT  │  │ TYPE PROMPT  │ │
+│  │                 │  │                 │  │              │ │
+│  │ • Role Definition│  │ • Math Expert   │  │ • Concept    │ │
+│  │ • Behavior Rules│  │ • Physics Expert│  │ • Step-by-step│ │
+│  │ • Response Style│  │ • Chemistry Exp │  │ • Problem    │ │
+│  │ • Language      │  │ • Biology Expert│  │ • Generation │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+│           │                     │                   │       │
+│           └─────────┬───────────┴─────────┬─────────┘       │
+│                     ▼                     ▼                 │
+│              ┌─────────────────┐  ┌─────────────────┐      │
+│              │ CONTEXT PROMPT  │  │ FINAL PROMPT    │      │
+│              │                 │  │                 │      │
+│              │ • Course Info   │  │ • Combined      │      │
+│              │ • User Info     │  │ • Optimized     │      │
+│              │ • Session Data  │  │ • Ready for AI  │      │
+│              └─────────────────┘  └─────────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+
+### 4.7 Cơ chế fallback và error handling
+
+#### A. Multi-level Fallback System
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    FALLBACK SYSTEM                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  Level 1: Ollama API (Primary)                             │
+│  ├── Success: Return AI Response                           │
+│  └── Failure: → Level 2                                    │
+│                                                             │
+│  Level 2: OpenAI API (Secondary)                           │
+│  ├── Success: Return AI Response                           │
+│  └── Failure: → Level 3                                    │
+│                                                             │
+│  Level 3: Rule-based System (Fallback)                     │
+│  ├── Pattern Matching                                      │
+│  ├── Predefined Responses                                  │
+│  └── Educational Templates                                 │
+│                                                             │
+│  Level 4: Error Message (Last Resort)                      │
+│  └── User-friendly Error + Retry Option                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+
+
+### 4.8 Scalability và Extensibility
+
+#### A. Modular Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  MODULAR ARCHITECTURE                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │   CORE MODULE   │  │ EDUCATIONAL     │  │ AI INTEGRATION│ │
+│  │                 │  │ MODULE          │  │ MODULE        │ │
+│  │ • Basic Chat    │  │ • Subject Detect│  │ • Ollama      │ │
+│  │ • UI Components │  │ • Question Class│  │ • OpenAI      │ │
+│  │ • AJAX Handler  │  │ • Prompt Eng    │  │ • Future APIs │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+│                                                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
+│  │ ANALYTICS       │  │ SECURITY        │  │ EXTENSIONS   │ │
+│  │ MODULE          │  │ MODULE          │  │ MODULE       │ │
+│  │ • Usage Stats   │  │ • Auth & Auth   │  │ • Voice Chat │ │
+│  │ • Performance   │  │ • Data Privacy  │  │ • Image AI   │ │
+│  │ • Learning Data │  │ • Rate Limiting │  │ • Multi-lang │ │
+│  └─────────────────┘  └─────────────────┘  └──────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
 
 
 
@@ -191,4 +422,5 @@ Mỗi loại câu hỏi có cấu trúc trả lời riêng biệt để đảm b
 
 **Sinh viên thực hiện:** Hoàng Nhật Linh, Huỳnh Nga  
 **CBHD:** PGS. TS. Thoại Nam, TS. Nguyễn Quang Hùng
+
 
