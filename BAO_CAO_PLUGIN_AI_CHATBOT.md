@@ -117,16 +117,6 @@ Mỗi loại câu hỏi có cấu trúc trả lời riêng biệt để đảm b
 - **Hóa:** Hiểu cấu trúc, phản ứng hóa học, bảng tuần hoàn
 - **Sinh:** Quan sát tự nhiên, học từ hình ảnh, hiểu quá trình
 
-#### B. Hệ thống động viên:
-- 30% cơ hội hiển thị lời động viên trong câu trả lời
-- 8 mẫu lời động viên khác nhau
-- Tập trung vào khuyến khích học tập tích cực
-
-#### C. Sinh câu hỏi tự động:
-- Tạo câu hỏi theo chủ đề và độ khó
-- Hỗ trợ đa dạng loại câu hỏi (trắc nghiệm, tự luận, thực hành)
-- Cung cấp gợi ý đáp án
-
 ---
 
 ## 4. KIẾN TRÚC HỆ THỐNG
@@ -416,6 +406,7 @@ function detect_subject_from_course($course) {
 
 **Sinh viên thực hiện:** Hoàng Nhật Linh, Huỳnh Nga  
 **CBHD:** PGS. TS. Thoại Nam, TS. Nguyễn Quang Hùng
+
 
 
 
