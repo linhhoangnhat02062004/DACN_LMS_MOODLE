@@ -31,10 +31,8 @@ Dự án nhằm nghiên cứu và phát triển một hệ thống LMS dựa tr�
 
 ### 2.1 Thông tin plugin
 - **Tên plugin:** `local_aichatbot`
-- **Phiên bản:** 1.0.0 (2024120100)
-- **Loại:** Local Plugin (Plugin địa phương)
-- **Yêu cầu:** Moodle 4.0+ (2022041900)
-- **Trạng thái:** MATURITY_STABLE
+- **Loại:** Local Plugin
+
 
 ### 2.2 Cấu trúc plugin
 
@@ -418,6 +416,7 @@ function detect_subject_from_course($course) {
 
 **Sinh viên thực hiện:** Hoàng Nhật Linh, Huỳnh Nga  
 **CBHD:** PGS. TS. Thoại Nam, TS. Nguyễn Quang Hùng
+
 
 
 
