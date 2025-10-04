@@ -368,7 +368,7 @@ function detect_subject_from_course($course) {
 │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
 │  │ ANALYTICS       │  │ SECURITY        │  │ EXTENSIONS   │ │
 │  │ MODULE          │  │ MODULE          │  │ MODULE       │ │
-│  │ • Usage Stats   │  │ • Auth & Auth   │  │ • Voice Chat │ │
+│  │ • Usage Stats   │  │ • Auth & Auth   │  │              │ │
 │  │ • Performance   │  │ • Data Privacy  │  │ • Image AI   │ │
 │  │ • Learning Data │  │ • Rate Limiting │  │ • Multi-lang │ │
 │  └─────────────────┘  └─────────────────┘  └──────────────┘ │
@@ -406,6 +406,7 @@ function detect_subject_from_course($course) {
 
 **Sinh viên thực hiện:** Hoàng Nhật Linh, Huỳnh Nga  
 **CBHD:** PGS. TS. Thoại Nam, TS. Nguyễn Quang Hùng
+
 
 
 
