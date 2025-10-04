@@ -27,7 +27,7 @@ Dự án nhằm nghiên cứu và phát triển một hệ thống LMS dựa tr�
 
 ---
 
-## 2. PHÂN TÍCH PLUGIN AI CHATBOT HIỆN CÓ
+## 2. PHÂN TÍCH PLUGIN AI CHATBOT MỚI ĐƯỢC THÊM VÀO
 
 ### 2.1 Thông tin plugin
 - **Tên plugin:** `local_aichatbot`
@@ -56,13 +56,13 @@ local/aichatbot/
 
 #### A. Cấu hình AI API
 - **API Key:** Cấu hình key cho OpenAI/GPT
-- **API URL:** Endpoint API (mặc định: https://api.openai.com/v1/chat/completions)
-- **Model:** Model AI sử dụng (gpt-3.5-turbo)
+- **API URL:** http://localhost:11434
+- **Model:** deepseek-r1:8b 
 - **Max Tokens:** Giới hạn độ dài phản hồi (1000)
 - **Temperature:** Độ sáng tạo của AI (0.7)
 
 #### B. Giao diện người dùng
-- **Chat container:** Thiết kế đẹp mắt, responsive
+- **Chat container** 
 - **Message display:** Hỗ trợ format markdown
 - **Typing indicator:** Hiệu ứng đang gõ
 - **Auto-scroll:** Tự động cuộn khi có tin nhắn mới
@@ -191,3 +191,4 @@ Mỗi loại câu hỏi có cấu trúc trả lời riêng biệt để đảm b
 
 **Sinh viên thực hiện:** Hoàng Nhật Linh, Huỳnh Nga  
 **CBHD:** PGS. TS. Thoại Nam, TS. Nguyễn Quang Hùng
+
