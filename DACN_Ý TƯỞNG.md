@@ -17,8 +17,9 @@
 ┌─────────────────────────────────────────┐
 │           AI STUDENT SUPPORT            │
 ├─────────────────────────────────────────┤
-│  Study Agent  │ Progress Agent │ Motivation Agent │
-│  (Giải bài)   │ (Theo dõi)     │ (Động viên)      │
+│ Study Agent│Progress Agent│ Motivation  |
+|            |              |   Agent     │
+│ (Giải bài) │ (Theo dõi)   │ (Động viên) │
 ├─────────────────────────────────────────┤
 │           Student Coordinator           │
 │        (Điều phối các Agent)            │
@@ -191,3 +192,4 @@ AI: "Bạn đã học 80% chương trình rồi, cố gắng thêm 30 phút nữ
 **Điểm mạnh:** Tính mới, ứng dụng thực tế, công nghệ tiên tiến
 **Thách thức:** Độ phức tạp kỹ thuật, thời gian phát triển
 **Tiềm năng:** Có thể mở rộng và thương mại hóa
+
