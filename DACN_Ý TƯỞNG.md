@@ -1,11 +1,10 @@
 # ĐỒ ÁN TỐT NGHIỆP
-## Hệ thống AI Agentic thông minh hỗ trợ học sinh sử dụng LangChain, MCP Server và RAG
 
 ---
 
 ## 📋 **THÔNG TIN ĐỒ ÁN**
 
-**Tên đề tài:** "Xây dựng hệ thống AI Agentic thông minh hỗ trợ học sinh sử dụng LangChain, MCP Server và RAG trong môi trường Moodle"
+**Tên đề tài:** "Nghiên cứu và phát triển một hệ thống quản lý học tập (Learning Management Systems – LMS) hỗ trợ AI"
 
 **Sinh viên thực hiện:** Hoàng Nhật Linh (2211847), Huỳnh Nga (2111818)
 
@@ -1086,5 +1085,6 @@ AI Study Agent với RAG:
 - ✅ **Demo scenarios:** 4 demo hoàn chỉnh
 - ✅ **Tài liệu kỹ thuật:** API, Database, Deployment
 - ✅ **Tính năng đặc biệt:** Phân tích thời gian học và nhắc nhở thông minh
+
 
 
