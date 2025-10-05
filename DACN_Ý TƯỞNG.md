@@ -1,4 +1,4 @@
-# ĐỒ ÁN TỐT NGHIỆP
+# ĐỒ ÁN CHUYÊN NGÀNH - ĐỒ ÁN TỐT NGHIỆP
 
 ---
 
@@ -1084,6 +1084,7 @@ AI Study Agent với RAG:
 - ✅ **Demo scenarios:** 4 demo hoàn chỉnh
 - ✅ **Tài liệu kỹ thuật:** API, Database, Deployment
 - ✅ **Tính năng đặc biệt:** Phân tích thời gian học và nhắc nhở thông minh
+
 
 
 
