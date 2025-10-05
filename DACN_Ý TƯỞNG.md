@@ -1,4 +1,4 @@
-# ĐỒ ÁN TỐT NGHIỆP - BẢN TỔNG HỢP CUỐI CÙNG
+# ĐỒ ÁN TỐT NGHIỆP
 ## Hệ thống AI Agentic thông minh hỗ trợ học sinh sử dụng LangChain, MCP Server và RAG
 
 ---
@@ -1086,4 +1086,5 @@ AI Study Agent với RAG:
 - ✅ **Demo scenarios:** 4 demo hoàn chỉnh
 - ✅ **Tài liệu kỹ thuật:** API, Database, Deployment
 - ✅ **Tính năng đặc biệt:** Phân tích thời gian học và nhắc nhở thông minh
+
 
