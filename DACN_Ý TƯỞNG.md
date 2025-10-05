@@ -516,6 +516,6 @@ GET  /api/rag/sources
 - 🚀 **Mở rộng:** Áp dụng cho nhiều môn học
 - 🚀 **Thương mại hóa:** Bán cho các trường học
 - 🚀 **Nghiên cứu:** Phát triển thành platform
-- 🚀 **Quốc tế:** Mở rộng ra thị trường quốc tế
 
 **Đây là một đồ án có tiềm năng lớn và có thể tạo ra tác động tích cực trong lĩnh vực giáo dục!**
+
