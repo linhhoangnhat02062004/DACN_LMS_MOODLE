@@ -13,7 +13,6 @@
 
 **Ngành:** Khoa học máy tính - Chương trình CQ
 
-**Thời gian thực hiện:** 6 tháng (3 tháng đầu + 3 tháng sau)
 
 ---
 
@@ -580,3 +579,4 @@ AI Study Agent với RAG:
 - ✅ **Demo scenarios:** 4 demo hoàn chỉnh
 - ✅ **Tài liệu kỹ thuật:** API, Database, Deployment
 - ✅ **Tính năng đặc biệt:** Phân tích thời gian học và nhắc nhở thông minh
+
