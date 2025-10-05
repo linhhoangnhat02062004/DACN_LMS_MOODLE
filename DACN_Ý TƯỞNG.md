@@ -101,6 +101,8 @@ AI: Giải thích dựa trên tài liệu + Đưa ra nguồn tham khảo
 ### **2. Theo dõi tiến độ**
 - Phân tích điểm số từ Moodle
 - Phát hiện điểm mạnh/yếu
+- **Phân tích thời gian học theo chủ đề**
+- **Nhắc nhở học tập thông minh**
 - Đề xuất tài liệu cải thiện
 
 ### **3. Động viên học tập**
@@ -127,6 +129,8 @@ Nguồn: "Toán học 10, Chương 2, trang 45-60"
 ### **Demo 2: Phân tích tiến độ**
 ```
 AI: "Điểm Toán: 8.5 (tăng 0.5), Điểm Lý: 7.0 (cần cải thiện)"
+Thời gian học: Toán 2h/ngày (đủ), Lý 0.5h/ngày (thiếu)
+Nhắc nhở: "Bạn chưa học Lý hôm nay, hãy dành 1 giờ cho chủ đề Điện từ"
 Đề xuất: Tìm tài liệu "Vật lý 10, Chương 3" để cải thiện
 ```
 
@@ -204,9 +208,14 @@ AI: "Bạn đã học 80% chương trình rồi, cố gắng thêm 30 phút nữ
 ```
 1. Lấy dữ liệu từ Moodle: Điểm quiz, assignment, thời gian học
 2. Phân tích xu hướng: "Điểm Toán tăng 0.5, điểm Lý giảm 0.3"
-3. RAG tìm tài liệu: "Vật lý 10, Chương 3" cho điểm Lý thấp
-4. Tạo báo cáo: "Bạn cần cải thiện Lý, tài liệu đề xuất:..."
-5. Đặt mục tiêu: "Học thêm 1 giờ Lý/ngày trong 2 tuần tới"
+3. Phân tích thời gian học theo chủ đề:
+   - Toán: 2 giờ/ngày (đủ)
+   - Lý: 0.5 giờ/ngày (thiếu)
+   - Hóa: 1 giờ/ngày (vừa đủ)
+4. RAG tìm tài liệu: "Vật lý 10, Chương 3" cho điểm Lý thấp
+5. Tạo báo cáo: "Bạn cần cải thiện Lý, tài liệu đề xuất:..."
+6. Đặt mục tiêu: "Học thêm 1 giờ Lý/ngày trong 2 tuần tới"
+7. Nhắc nhở: "Bạn chưa học Lý hôm nay, hãy dành 1 giờ cho chủ đề Điện từ"
 ```
 
 #### **Motivation Agent - Động viên thông minh:**
@@ -315,6 +324,11 @@ foreach ($files as $file) {
    - Điểm mạnh: Toán học tốt, thời gian học đều đặn
    - Điểm yếu: Vật lý cần cải thiện
    - Vấn đề: Học sinh gặp khó khăn với chủ đề "Điện từ"
+   - Thời gian học theo chủ đề:
+     * Toán: 2 giờ/ngày (đủ, điểm tốt)
+     * Lý: 0.5 giờ/ngày (thiếu, điểm thấp)
+     * Hóa: 1 giờ/ngày (vừa đủ, điểm trung bình)
+   - Nhắc nhở: "Bạn chưa học Lý hôm nay, hãy dành 1 giờ cho chủ đề Điện từ"
    ```
 
 3. **RAG tìm tài liệu:**
@@ -330,10 +344,20 @@ foreach ($files as $file) {
    ✅ Điểm Toán: 8.5 (tăng 0.5) - Rất tốt!
    ⚠️ Điểm Lý: 7.0 (cần cải thiện)
    
+   Phân tích thời gian học:
+   📊 Toán: 2 giờ/ngày (đủ) → Điểm tốt
+   📊 Lý: 0.5 giờ/ngày (thiếu) → Điểm thấp
+   📊 Hóa: 1 giờ/ngày (vừa đủ) → Điểm trung bình
+   
+   Nhắc nhở thông minh:
+   🔔 "Bạn chưa học Lý hôm nay, hãy dành 1 giờ cho chủ đề Điện từ"
+   🔔 "Thời gian học Lý của bạn ít hơn 50% so với Toán"
+   
    Đề xuất:
    - Tăng thời gian học Lý: 1 giờ/ngày
    - Tài liệu: Vật lý 10, Chương 3, trang 78-95
-   - Mục tiêu: Đạt 8.0 điểm Lý trong 2 tuần tới"
+   - Mục tiêu: Đạt 8.0 điểm Lý trong 2 tuần tới
+   - Lịch học đề xuất: 19:00-20:00 hàng ngày cho Lý"
    ```
 
 ### **Scenario 3: Động viên khi học sinh chán nản**
@@ -445,6 +469,30 @@ CREATE TABLE mdl_local_aichatbot_user_prefs (
     preferences TEXT, -- JSON object
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Bảng theo dõi thời gian học theo chủ đề
+CREATE TABLE mdl_local_aichatbot_study_time (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    topic VARCHAR(100) NOT NULL,
+    study_time INTEGER NOT NULL, -- phút
+    study_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Bảng nhắc nhở học tập
+CREATE TABLE mdl_local_aichatbot_reminders (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    course_id BIGINT,
+    topic VARCHAR(100),
+    reminder_type VARCHAR(20), -- 'daily', 'weekly', 'custom'
+    message TEXT NOT NULL,
+    is_sent BOOLEAN DEFAULT FALSE,
+    scheduled_time TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ### **3. API Endpoints**
@@ -459,6 +507,10 @@ POST /api/study/generate-exercises
 GET  /api/progress/overview
 GET  /api/progress/analysis
 POST /api/progress/set-goals
+GET  /api/progress/study-time
+POST /api/progress/track-study-time
+GET  /api/progress/reminders
+POST /api/progress/create-reminder
 
 # Motivation Agent APIs
 POST /api/motivation/boost
@@ -516,6 +568,161 @@ GET  /api/rag/sources
 - 🚀 **Mở rộng:** Áp dụng cho nhiều môn học
 - 🚀 **Thương mại hóa:** Bán cho các trường học
 - 🚀 **Nghiên cứu:** Phát triển thành platform
+- 🚀 **Quốc tế:** Mở rộng ra thị trường quốc tế
+
+---
+
+## 📚 **TÍNH NĂNG PHÂN TÍCH THỜI GIAN HỌC CHI TIẾT**
+
+### **1. Theo dõi thời gian học theo chủ đề**
+
+#### **Cách hoạt động:**
+```
+- Theo dõi thời gian học của từng môn/chủ đề
+- Phân tích xu hướng học tập hàng ngày/tuần
+- So sánh thời gian học với điểm số
+- Phát hiện môn học bị bỏ quên
+```
+
+#### **Ví dụ phân tích:**
+```
+📊 Phân tích thời gian học tuần này:
+- Toán: 14 giờ (2 giờ/ngày) → Điểm 8.5/10 ✅
+- Lý: 3.5 giờ (0.5 giờ/ngày) → Điểm 7.0/10 ⚠️
+- Hóa: 7 giờ (1 giờ/ngày) → Điểm 7.5/10 ⚠️
+- Sinh: 0 giờ → Điểm 6.0/10 ❌
+
+🔍 Phát hiện:
+- Bạn học Toán quá nhiều (có thể giảm 30 phút/ngày)
+- Bạn bỏ quên môn Sinh (cần học 1 giờ/ngày)
+- Thời gian học Lý không đủ để cải thiện điểm số
+```
+
+### **2. Nhắc nhở học tập thông minh**
+
+#### **Loại nhắc nhở:**
+- **Nhắc nhở hàng ngày:** "Bạn chưa học Lý hôm nay"
+- **Nhắc nhở theo lịch:** "Đã đến giờ học Hóa (19:00)"
+- **Nhắc nhở theo tiến độ:** "Bạn đã bỏ quên Sinh 3 ngày liên tiếp"
+- **Nhắc nhở cân bằng:** "Bạn học Toán quá nhiều, hãy dành thời gian cho Lý"
+
+#### **Ví dụ nhắc nhở:**
+```
+🔔 Nhắc nhở thông minh:
+
+1. "Bạn chưa học Lý hôm nay, hãy dành 1 giờ cho chủ đề Điện từ"
+2. "Đã đến giờ học Hóa (19:00), bạn có muốn bắt đầu không?"
+3. "Bạn đã bỏ quên môn Sinh 3 ngày liên tiếp, điểm số đang giảm"
+4. "Thời gian học Lý của bạn ít hơn 50% so với Toán"
+5. "Bạn học Toán 3 giờ/ngày, có thể giảm 30 phút để học Lý"
+```
+
+### **3. Đề xuất lịch học cá nhân hóa**
+
+#### **Dựa trên:**
+- Thời gian học hiện tại
+- Điểm số từng môn
+- Mục tiêu học tập
+- Thói quen học tập
+
+#### **Ví dụ lịch học đề xuất:**
+```
+📅 Lịch học đề xuất cho tuần tới:
+
+Thứ 2-6:
+- 18:00-19:00: Toán (giảm 30 phút)
+- 19:00-20:00: Lý (tăng 30 phút)
+- 20:00-21:00: Hóa (giữ nguyên)
+- 21:00-21:30: Sinh (mới thêm)
+
+Thứ 7:
+- 9:00-10:00: Ôn tập Toán
+- 10:00-11:00: Ôn tập Lý
+- 14:00-15:00: Làm bài tập Hóa
+- 15:00-15:30: Ôn tập Sinh
+
+Chủ nhật:
+- Nghỉ ngơi hoặc học nhẹ nhàng
+```
+
+### **4. Báo cáo tiến độ chi tiết**
+
+#### **Báo cáo hàng ngày:**
+```
+📈 Báo cáo học tập hôm nay:
+
+✅ Hoàn thành:
+- Toán: 2 giờ (bài tập chương 2)
+- Hóa: 1 giờ (thí nghiệm ảo)
+
+⚠️ Chưa hoàn thành:
+- Lý: 0 giờ (dự kiến 1 giờ)
+- Sinh: 0 giờ (dự kiến 30 phút)
+
+📊 Tổng thời gian: 3 giờ/5 giờ dự kiến (60%)
+🎯 Mục tiêu ngày mai: Học đủ 5 giờ, tập trung vào Lý và Sinh
+```
+
+#### **Báo cáo hàng tuần:**
+```
+📊 Báo cáo tuần (Tuần 1):
+
+Thời gian học theo môn:
+- Toán: 14 giờ (mục tiêu: 12 giờ) ✅
+- Lý: 3.5 giờ (mục tiêu: 7 giờ) ❌
+- Hóa: 7 giờ (mục tiêu: 7 giờ) ✅
+- Sinh: 0 giờ (mục tiêu: 3.5 giờ) ❌
+
+Xu hướng:
+📈 Toán: Tăng 2 giờ so với tuần trước
+📉 Lý: Giảm 1 giờ so với tuần trước
+📉 Sinh: Không học (tuần trước: 2 giờ)
+
+Đề xuất tuần tới:
+- Giảm thời gian Toán: 2 giờ → 1.5 giờ/ngày
+- Tăng thời gian Lý: 0.5 giờ → 1 giờ/ngày
+- Thêm môn Sinh: 0 giờ → 30 phút/ngày
+```
+
+### **5. Tích hợp với Moodle**
+
+#### **Lấy dữ liệu từ Moodle:**
+```sql
+-- Lấy thời gian học từ log
+SELECT 
+    u.username,
+    l.action,
+    l.timecreated,
+    c.fullname as course_name
+FROM mdl_log l
+JOIN mdl_user u ON l.userid = u.id
+JOIN mdl_course c ON l.courseid = c.id
+WHERE l.action IN ('view', 'add', 'update', 'delete')
+AND l.timecreated >= ?
+AND l.timecreated <= ?
+ORDER BY l.timecreated;
+```
+
+#### **Phân tích hoạt động học tập:**
+```php
+class StudyTimeAnalyzer {
+    public function analyze_study_time($user_id, $course_id, $date_range) {
+        // Lấy dữ liệu từ Moodle log
+        $activities = $this->get_moodle_activities($user_id, $course_id, $date_range);
+        
+        // Phân tích thời gian theo chủ đề
+        $study_time = $this->calculate_study_time_by_topic($activities);
+        
+        // Tạo nhắc nhở
+        $reminders = $this->generate_reminders($study_time, $user_id);
+        
+        return [
+            'study_time' => $study_time,
+            'reminders' => $reminders,
+            'recommendations' => $this->generate_recommendations($study_time)
+        ];
+    }
+}
+```
 
 **Đây là một đồ án có tiềm năng lớn và có thể tạo ra tác động tích cực trong lĩnh vực giáo dục!**
-
