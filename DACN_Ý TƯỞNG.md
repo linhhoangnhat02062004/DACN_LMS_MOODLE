@@ -1,1091 +1,1908 @@
-# ĐỒ ÁN CHUYÊN NGÀNH - ĐỒ ÁN TỐT NGHIỆP
+# KẾ HOẠCH TRIỂN KHAI AGENTIC AI TRONG MOODLE SỬ DỤNG LANGCHAIN
+
+## Tổng quan dự án
+Triển khai hệ thống AI Agentic trong LMS Moodle sử dụng framework LangChain để tạo ra "gia sư ảo" thông minh, có khả năng:
+- Theo dõi tiến độ học tập cá nhân
+- Điều chỉnh bài giảng phù hợp với từng học viên
+- Tạo tình huống mô phỏng sinh động
+- Hỗ trợ học tập 24/7
 
 ---
 
-## 📋 **THÔNG TIN ĐỒ ÁN**
+## 1. KIẾN TRÚC TỔNG THỂ
 
-**Tên đề tài:** "Nghiên cứu và phát triển một hệ thống quản lý học tập (Learning Management Systems – LMS) hỗ trợ AI"
-
-**Sinh viên thực hiện:** Hoàng Nhật Linh (2211847), Huỳnh Nga (2111818)
-
-**CBHD:** PGS. TS. Thoại Nam, TS. Nguyễn Quang Hùng
-
-**Ngành:** Khoa học máy tính - Chương trình CQ
-
-
----
-
-## 🎯 **Ý TƯỞNG CHÍNH**
-
-### **Mục tiêu:**
-Tạo ra một hệ thống AI có khả năng hiểu và hỗ trợ học sinh một cách thông minh, dựa trên tài liệu khóa học thực tế, với độ chính xác cao và nguồn tham khảo rõ ràng.
-
-### **Vấn đề cần giải quyết:**
-- Học sinh thiếu người hướng dẫn cá nhân
-- Không có hệ thống học tập phù hợp với từng cá nhân
-- Thiếu động lực và hướng dẫn học tập
-- Không thể theo dõi và cải thiện hiệu quả học tập
-- AI thường trả lời sai hoặc không có nguồn tham khảo
-
----
-
-## 🏗️ **KIẾN TRÚC HỆ THỐNG**
-
+### 1.1 Sơ đồ kiến trúc LangChain + Moodle
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    AI STUDENT SUPPORT SYSTEM                │
+│                    MOODLE LMS                               │
 ├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
-│  │   Study     │  │   Progress  │  │  Motivation │        │
-│  │   Agent     │  │    Agent    │  │    Agent    │        │
-│  └─────────────┘  └─────────────┘  └─────────────┘        │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │   Study     │  │  Progress   │  │ Motivation  │         │
+│  │   Agent     │  │   Agent     │  │   Agent     │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
 │           │               │               │                │
 │           └───────────────┼───────────────┘                │
 │                           │                                │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │              STUDENT COORDINATOR                        │ │
-│  │  • Quản lý các Agent hỗ trợ học sinh                  │ │
-│  │  • Phân phối nhiệm vụ học tập                          │ │
-│  │  • Điều phối giao tiếp                                 │ │
-│  │  • Quản lý mục tiêu học tập                            │ │
-│  └─────────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              STUDENT COORDINATOR                        ││
+│  │              (LangChain Agent)                          ││
+│  └─────────────────────────────────────────────────────────┘│
 │                           │                                │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │              RAG SYSTEM LAYER                           │ │
-│  │  • Document Processing                                 │ │
-│  │  • Vector Database                                     │ │
-│  │  • Embedding Generation                                │ │
-│  │  • Retrieval & Generation                              │ │
-│  └─────────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                RAG SYSTEM                               ││
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     ││
+│  │  │ Document    │  │ Vector      │  │ Embedding   │     ││
+│  │  │ Processor   │  │ Database    │  │ Generator   │     ││
+│  │  └─────────────┘  └─────────────┘  └─────────────┘     ││
+│  └─────────────────────────────────────────────────────────┘│
 │                           │                                │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │              MCP SERVER LAYER                           │ │
-│  │  • Trao đổi dữ liệu học tập                            │ │
-│  │  • Quản lý ngữ cảnh học tập                            │ │
-│  │  • Đồng bộ hóa tiến độ học tập                         │ │
-│  │  • Quản lý phiên học tập                               │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                           │                                │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │              LANGCHAIN LAYER                            │ │
-│  │  • Xử lý câu hỏi học tập                               │ │
-│  │  • Tạo nội dung học tập                                │ │
-│  │  • Quản lý bộ nhớ học tập                              │ │
-│  │  • Tích hợp công cụ AI                                 │ │
-│  └─────────────────────────────────────────────────────────┘ │
-│                           │                                │
-│  ┌─────────────────────────────────────────────────────────┐ │
-│  │              DATA & TOOLS LAYER                         │ │
-│  │  • Cơ sở dữ liệu học tập                               │ │
-│  │  • Công cụ AI (GPT, Claude, Ollama)                    │ │
-│  │  • API bên ngoài (Wikipedia, Khan Academy)             │ │
-│  │  • Hệ thống file và tài liệu                           │ │
-│  └─────────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │                MOODLE INTEGRATION                       ││
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     ││
+│  │  │ Course      │  │ User        │  │ Grade       │     ││
+│  │  │ Content     │  │ Progress    │  │ System      │     ││
+│  │  └─────────────┘  └─────────────┘  └─────────────┘     ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+                           │
+┌─────────────────────────────────────────────────────────────┐
+│                PYTHON LANGCHAIN LAYER                       │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ LangChain   │  │ OpenAI/     │  │ Vector      │         │
+│  │ Framework   │  │ Claude      │  │ Store       │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
----
+### 1.2 Các thành phần chính
 
-## 🤖 **4 AI AGENT CHÍNH**
+#### **1.2.1 LangChain Components**
+- **Agents**: Các AI agent chuyên biệt
+- **Tools**: Công cụ tương tác với Moodle
+- **Memory**: Lưu trữ context và lịch sử
+- **Chains**: Kết nối các component
+- **Vector Stores**: Lưu trữ embeddings
 
-### **1. Study Agent (AI Học tập)**
-- **Chức năng:** Giải bài tập, giải thích khái niệm, tạo bài tập luyện tập
-- **Công cụ:** Problem Solver, Concept Explainer, Exercise Generator, Study Method Guide
-- **RAG Integration:** Tìm kiếm tài liệu liên quan, trả lời dựa trên tài liệu khóa học
-- **Ví dụ:** Giải phương trình bậc 2 từng bước, tạo bài tập tương tự
-
-### **2. Progress Agent (AI Theo dõi tiến độ)**
-- **Chức năng:** Theo dõi tiến độ, phân tích điểm mạnh/yếu, đề xuất cải thiện
-- **Công cụ:** Progress Tracker, Strength Weakness Analyzer, Improvement Suggestion
-- **RAG Integration:** Tìm tài liệu cải thiện cho từng vấn đề
-- **Tính năng đặc biệt:** Phân tích thời gian học theo chủ đề, nhắc nhở học tập thông minh
-- **Ví dụ:** Báo cáo tuần: "Điểm Toán tăng 0.5, cần cải thiện Lý"
-
-### **3. Motivation Agent (AI Động viên)**
-- **Chức năng:** Tạo động lực, động viên khi gặp khó khăn, đặt mục tiêu
-- **Công cụ:** Motivation Booster, Goal Setting, Achievement Celebrator
-- **RAG Integration:** Tìm tài liệu động viên, câu chuyện thành công
-- **Ví dụ:** "Bạn đã học được 80% chương trình, hãy cố gắng thêm 30 phút nữa"
-
-### **4. Student Coordinator (Điều phối viên)**
-- **Chức năng:** Quản lý các Agent, phân phối nhiệm vụ, điều phối giao tiếp
-- **Công cụ:** Task Scheduler, Communication Manager, Goal Manager
-- **RAG Integration:** Điều phối RAG queries giữa các Agent
-- **Ví dụ:** Phân tích câu hỏi và giao cho Agent phù hợp xử lý
+#### **1.2.2 Moodle Integration**
+- **Plugin Architecture**: Tích hợp vào local/aichatbot
+- **Database Integration**: Sử dụng Moodle DB
+- **API Integration**: Tương tác với Moodle APIs
+- **User Management**: Tích hợp với hệ thống user
 
 ---
 
-## 🔍 **RAG SYSTEM (Retrieval-Augmented Generation)**
+## 2. THIẾT KẾ CHI TIẾT CÁC AI AGENTS
 
-### **Cách hoạt động:**
-1. **Retrieve (Tìm kiếm):** Tìm tài liệu liên quan từ khóa học
-2. **Augment (Tăng cường):** Bổ sung thông tin vào câu hỏi
-3. **Generate (Tạo sinh):** Tạo câu trả lời dựa trên tài liệu
+### 2.1 Study Agent (Gia sư học tập)
 
-### **Quy trình chi tiết:**
-```
-Bước 1: Document Processing
-- Lấy tài liệu từ Moodle course
-- Chia nhỏ thành chunks (1000 ký tự/chunk)
-- Tạo embeddings bằng sentence-transformers
-- Lưu vào vector database
-
-Bước 2: Query Processing
-- Học sinh hỏi: "Định lý Bayes là gì?"
-- Tạo embedding cho câu hỏi
-- Tìm kiếm similarity trong vector database
-- Lấy top 5 chunks liên quan nhất
-
-Bước 3: Answer Generation
-- Tạo prompt: "Dựa trên tài liệu: [chunks]... Trả lời: [câu hỏi]"
-- LLM tạo câu trả lời dựa trên context
-- Trả về: Câu trả lời + Nguồn tham khảo + Confidence score
-```
-
-### **Ví dụ:**
-```
-Học sinh: "Định lý Bayes là gì?"
-↓
-RAG System: Tìm trong tài liệu "Xác suất thống kê, Chương 3"
-↓
-AI: Giải thích dựa trên tài liệu + Đưa ra nguồn tham khảo
-```
-
----
-
-## 🔗 **LANGCHAIN INTEGRATION**
-
-### **Chức năng chính:**
-- **Xử lý ngôn ngữ tự nhiên:** Hiểu câu hỏi của học sinh
-- **Quản lý bộ nhớ:** Lưu trữ lịch sử cuộc trò chuyện
-- **Tích hợp công cụ AI:** Kết nối với các AI models
-- **Xây dựng chuỗi xử lý:** Tạo pipeline xử lý phức tạp
-
-### **Components:**
+#### **2.1.1 Chức năng chính:**
 ```python
-# LangChain Components
-- LLM (Large Language Model): OpenAI GPT-4, Claude, Ollama
-- Memory: ConversationBufferMemory, ConversationSummaryMemory
-- Chains: LLMChain, ConversationChain, RetrievalQAChain
-- Tools: Search, Calculator, Course Info
-- Agents: Zero-shot Agent, ReAct Agent
-```
+# local/aichatbot/python/agents/study_agent.py
+from langchain.agents import Tool, AgentExecutor, create_react_agent
+from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferWindowMemory
+from langchain.tools import BaseTool
 
-### **Tích hợp với AI Agents:**
-```python
 class StudyAgent:
-    def __init__(self):
-        self.llm = OpenAI()
-        self.memory = ConversationBufferMemory()
-        self.chain = ConversationChain(llm=self.llm, memory=self.memory)
-        self.rag_chain = RetrievalQAChain.from_llm(self.llm, self.retriever)
+    def __init__(self, llm, rag_system, moodle_tools):
+        self.llm = llm
+        self.rag_system = rag_system
+        self.moodle_tools = moodle_tools
+        self.memory = ConversationBufferWindowMemory(
+            k=10,  # Lưu 10 cuộc hội thoại gần nhất
+            return_messages=True
+        )
+        
+        # Tạo tools cho Study Agent
+        self.tools = [
+            Tool(
+                name="search_course_content",
+                description="Tìm kiếm nội dung khóa học liên quan đến câu hỏi",
+                func=self.search_course_content
+            ),
+            Tool(
+                name="get_user_progress",
+                description="Lấy tiến độ học tập của học viên",
+                func=self.get_user_progress
+            ),
+            Tool(
+                name="generate_practice_questions",
+                description="Tạo câu hỏi luyện tập dựa trên chủ đề",
+                func=self.generate_practice_questions
+            ),
+            Tool(
+                name="explain_concept",
+                description="Giải thích khái niệm với ví dụ cụ thể",
+                func=self.explain_concept
+            )
+        ]
+        
+        # Tạo prompt template
+        self.prompt = PromptTemplate(
+            template="""
+            Bạn là một gia sư AI thông minh trong hệ thống Moodle. 
+            Nhiệm vụ của bạn là giúp học viên học tập hiệu quả.
+            
+            Thông tin học viên:
+            - Tên: {student_name}
+            - Khóa học: {course_name}
+            - Tiến độ: {progress_percentage}%
+            - Điểm mạnh: {strengths}
+            - Điểm yếu: {weaknesses}
+            
+            Lịch sử hội thoại:
+            {chat_history}
+            
+            Câu hỏi hiện tại: {input}
+            
+            Hãy trả lời một cách:
+            1. Thân thiện và khuyến khích
+            2. Cung cấp ví dụ cụ thể
+            3. Đề xuất tài liệu học tập
+            4. Tạo câu hỏi luyện tập nếu cần
+            
+            {agent_scratchpad}
+            """,
+            input_variables=["input", "chat_history", "student_name", 
+                           "course_name", "progress_percentage", 
+                           "strengths", "weaknesses", "agent_scratchpad"]
+        )
+        
+        # Tạo agent
+        self.agent = create_react_agent(
+            llm=self.llm,
+            tools=self.tools,
+            prompt=self.prompt
+        )
+        
+        self.agent_executor = AgentExecutor(
+            agent=self.agent,
+            tools=self.tools,
+            memory=self.memory,
+            verbose=True,
+            max_iterations=5
+        )
     
-    def solve_problem(self, problem):
-        # Sử dụng RAG chain để tìm tài liệu liên quan
-        context = self.rag_chain.run(problem)
-        # Sử dụng conversation chain để tạo câu trả lời
-        response = self.chain.predict(input=problem, context=context)
-        return response
-```
-
----
-
-## 🌐 **MCP SERVER (Model Context Protocol)**
-
-### **Chức năng chính:**
-- **Trao đổi dữ liệu học tập:** Giao tiếp giữa các components
-- **Quản lý ngữ cảnh học tập:** Lưu trữ context của học sinh
-- **Đồng bộ hóa tiến độ:** Cập nhật tiến độ học tập real-time
-- **Quản lý phiên học tập:** Theo dõi session học tập
-
-### **MCP Server Architecture:**
-```python
-class MoodleMCPServer:
-    def __init__(self):
-        self.tools = {
-            'get_course_info': self.get_course_info,
-            'get_student_progress': self.get_student_progress,
-            'generate_quiz_questions': self.generate_quiz_questions,
-            'analyze_student_performance': self.analyze_student_performance,
-            'get_course_recommendations': self.get_course_recommendations
+    def process_question(self, question, user_id, course_id):
+        """Xử lý câu hỏi của học viên"""
+        # Lấy thông tin học viên
+        student_info = self.moodle_tools.get_student_info(user_id, course_id)
+        
+        # Tìm kiếm nội dung liên quan
+        relevant_content = self.rag_system.search(question, course_id)
+        
+        # Xử lý với agent
+        response = self.agent_executor.invoke({
+            "input": question,
+            "student_name": student_info["name"],
+            "course_name": student_info["course_name"],
+            "progress_percentage": student_info["progress"],
+            "strengths": student_info["strengths"],
+            "weaknesses": student_info["weaknesses"]
+        })
+        
+        return {
+            "answer": response["output"],
+            "sources": relevant_content["sources"],
+            "confidence": relevant_content["confidence"],
+            "suggestions": self.generate_learning_suggestions(student_info)
         }
     
-    async def handle_request(self, request):
-        # Xử lý request từ MCP Client
-        tool_name = request['tool']
-        params = request['params']
-        result = await self.tools[tool_name](**params)
-        return result
-```
-
-### **MCP Client Integration:**
-```python
-class LangChainMCPAgent:
-    def __init__(self):
-        self.mcp_client = MCPClient()
-        self.llm = OpenAI()
-        self.tools = self.setup_mcp_tools()
-        self.agent = initialize_agent(self.tools, self.llm)
+    def search_course_content(self, query):
+        """Tool: Tìm kiếm nội dung khóa học"""
+        return self.rag_system.search(query)
     
-    def setup_mcp_tools(self):
-        # Tạo LangChain tools từ MCP tools
-        tools = []
-        for tool_name in self.mcp_client.list_tools():
-            tool = Tool(
-                name=tool_name,
-                description=f"Moodle {tool_name} tool",
-                func=lambda x: self.mcp_client.call_tool(tool_name, x)
+    def get_user_progress(self, user_id):
+        """Tool: Lấy tiến độ học viên"""
+        return self.moodle_tools.get_user_progress(user_id)
+    
+    def generate_practice_questions(self, topic):
+        """Tool: Tạo câu hỏi luyện tập"""
+        return self.rag_system.generate_questions(topic)
+    
+    def explain_concept(self, concept):
+        """Tool: Giải thích khái niệm"""
+        return self.rag_system.explain_concept(concept)
+```
+
+### 2.2 Progress Agent (Theo dõi tiến độ)
+
+#### **2.2.1 Chức năng chính:**
+```python
+# local/aichatbot/python/agents/progress_agent.py
+from langchain.agents import Tool, AgentExecutor, create_react_agent
+from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationSummaryBufferMemory
+
+class ProgressAgent:
+    def __init__(self, llm, moodle_tools, analytics_engine):
+        self.llm = llm
+        self.moodle_tools = moodle_tools
+        self.analytics_engine = analytics_engine
+        self.memory = ConversationSummaryBufferMemory(
+            llm=llm,
+            max_token_limit=1000,
+            return_messages=True
+        )
+        
+        self.tools = [
+            Tool(
+                name="analyze_learning_patterns",
+                description="Phân tích mẫu học tập của học viên",
+                func=self.analyze_learning_patterns
+            ),
+            Tool(
+                name="predict_performance",
+                description="Dự đoán hiệu suất học tập",
+                func=self.predict_performance
+            ),
+            Tool(
+                name="recommend_learning_path",
+                description="Đề xuất lộ trình học tập",
+                func=self.recommend_learning_path
+            ),
+            Tool(
+                name="identify_learning_gaps",
+                description="Xác định khoảng trống kiến thức",
+                func=self.identify_learning_gaps
             )
-            tools.append(tool)
-        return tools
+        ]
+        
+        self.prompt = PromptTemplate(
+            template="""
+            Bạn là một chuyên gia phân tích tiến độ học tập AI.
+            Nhiệm vụ: Phân tích và đưa ra khuyến nghị cải thiện học tập.
+            
+            Dữ liệu học viên:
+            - ID: {user_id}
+            - Khóa học: {course_id}
+            - Thời gian học: {study_time}
+            - Điểm số: {scores}
+            - Hoạt động: {activities}
+            
+            Hãy phân tích và đưa ra:
+            1. Đánh giá tiến độ hiện tại
+            2. Điểm mạnh và điểm yếu
+            3. Khuyến nghị cải thiện
+            4. Lộ trình học tập tối ưu
+            
+            {agent_scratchpad}
+            """,
+            input_variables=["user_id", "course_id", "study_time", 
+                           "scores", "activities", "agent_scratchpad"]
+        )
+        
+        self.agent = create_react_agent(
+            llm=self.llm,
+            tools=self.tools,
+            prompt=self.prompt
+        )
+        
+        self.agent_executor = AgentExecutor(
+            agent=self.agent,
+            tools=self.tools,
+            memory=self.memory,
+            verbose=True
+        )
+    
+    def analyze_student_progress(self, user_id, course_id):
+        """Phân tích tiến độ học viên"""
+        # Lấy dữ liệu từ Moodle
+        student_data = self.moodle_tools.get_comprehensive_data(user_id, course_id)
+        
+        # Phân tích với agent
+        analysis = self.agent_executor.invoke({
+            "user_id": user_id,
+            "course_id": course_id,
+            "study_time": student_data["study_time"],
+            "scores": student_data["scores"],
+            "activities": student_data["activities"]
+        })
+        
+        return {
+            "analysis": analysis["output"],
+            "recommendations": self.generate_recommendations(student_data),
+            "learning_path": self.create_learning_path(student_data),
+            "alerts": self.check_learning_alerts(student_data)
+        }
+    
+    def analyze_learning_patterns(self, user_id):
+        """Tool: Phân tích mẫu học tập"""
+        return self.analytics_engine.analyze_patterns(user_id)
+    
+    def predict_performance(self, user_id, course_id):
+        """Tool: Dự đoán hiệu suất"""
+        return self.analytics_engine.predict_performance(user_id, course_id)
+    
+    def recommend_learning_path(self, user_data):
+        """Tool: Đề xuất lộ trình"""
+        return self.analytics_engine.recommend_path(user_data)
+    
+    def identify_learning_gaps(self, user_id, course_id):
+        """Tool: Xác định khoảng trống"""
+        return self.analytics_engine.identify_gaps(user_id, course_id)
+```
+
+### 2.3 Motivation Agent (Động viên học tập)
+
+#### **2.3.1 Chức năng chính:**
+```python
+# local/aichatbot/python/agents/motivation_agent.py
+from langchain.agents import Tool, AgentExecutor, create_react_agent
+from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory
+
+class MotivationAgent:
+    def __init__(self, llm, moodle_tools, gamification_engine):
+        self.llm = llm
+        self.moodle_tools = moodle_tools
+        self.gamification_engine = gamification_engine
+        self.memory = ConversationBufferMemory(
+            k=15,
+            return_messages=True
+        )
+        
+        self.tools = [
+            Tool(
+                name="check_achievements",
+                description="Kiểm tra thành tích và huy hiệu",
+                func=self.check_achievements
+            ),
+            Tool(
+                name="create_challenge",
+                description="Tạo thử thách học tập",
+                func=self.create_challenge
+            ),
+            Tool(
+                name="send_encouragement",
+                description="Gửi lời động viên cá nhân hóa",
+                func=self.send_encouragement
+            ),
+            Tool(
+                name="track_streak",
+                description="Theo dõi chuỗi học tập",
+                func=self.track_streak
+            )
+        ]
+        
+        self.prompt = PromptTemplate(
+            template="""
+            Bạn là một chuyên gia tâm lý học tập AI, chuyên động viên và khuyến khích học viên.
+            
+            Thông tin học viên:
+            - Tên: {student_name}
+            - Tâm trạng: {mood}
+            - Tiến độ: {progress}
+            - Thành tích: {achievements}
+            - Chuỗi học: {streak} ngày
+            
+            Mục tiêu: Động viên và khuyến khích học viên tiếp tục học tập.
+            
+            Hãy:
+            1. Nhận diện tâm trạng hiện tại
+            2. Đưa ra lời động viên phù hợp
+            3. Tạo thử thách thú vị
+            4. Đề xuất hoạt động gamification
+            
+            {agent_scratchpad}
+            """,
+            input_variables=["student_name", "mood", "progress", 
+                           "achievements", "streak", "agent_scratchpad"]
+        )
+        
+        self.agent = create_react_agent(
+            llm=self.llm,
+            tools=self.tools,
+            prompt=self.prompt
+        )
+        
+        self.agent_executor = AgentExecutor(
+            agent=self.agent,
+            tools=self.tools,
+            memory=self.memory,
+            verbose=True
+        )
+    
+    def motivate_student(self, user_id, context="general"):
+        """Động viên học viên"""
+        student_info = self.moodle_tools.get_motivation_data(user_id)
+        
+        response = self.agent_executor.invoke({
+            "student_name": student_info["name"],
+            "mood": student_info["mood"],
+            "progress": student_info["progress"],
+            "achievements": student_info["achievements"],
+            "streak": student_info["streak"]
+        })
+        
+        return {
+            "motivation_message": response["output"],
+            "challenges": self.create_personalized_challenges(student_info),
+            "achievements": self.check_new_achievements(student_info),
+            "gamification": self.suggest_gamification_activities(student_info)
+        }
+    
+    def check_achievements(self, user_id):
+        """Tool: Kiểm tra thành tích"""
+        return self.gamification_engine.check_achievements(user_id)
+    
+    def create_challenge(self, user_id, difficulty="medium"):
+        """Tool: Tạo thử thách"""
+        return self.gamification_engine.create_challenge(user_id, difficulty)
+    
+    def send_encouragement(self, user_id, context):
+        """Tool: Gửi động viên"""
+        return self.gamification_engine.send_encouragement(user_id, context)
+    
+    def track_streak(self, user_id):
+        """Tool: Theo dõi chuỗi"""
+        return self.gamification_engine.track_streak(user_id)
 ```
 
 ---
 
-## 🚀 **TẤT CẢ CÁC TÍNH NĂNG CỦA HỆ THỐNG**
+## 3. RAG SYSTEM VỚI LANGCHAIN
 
-### **1. TÍNH NĂNG STUDY AGENT (AI Học tập)**
+### 3.1 Document Processing Pipeline
 
-#### **1.1 Giải bài tập thông minh**
-- ✅ **Giải bài tập từng bước:** Hướng dẫn chi tiết cách giải
-- ✅ **Giải thích khái niệm:** Làm rõ các khái niệm khó hiểu
-- ✅ **Tạo bài tập tương tự:** Tạo bài tập luyện tập dựa trên bài gốc
-- ✅ **Kiểm tra đáp án:** Xác minh và chỉ ra lỗi sai
-- ✅ **Gợi ý phương pháp:** Đề xuất cách tiếp cận bài tập
+```python
+# local/aichatbot/python/rag/document_processor.py
+from langchain.document_loaders import DirectoryLoader, PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.chains import RetrievalQA
+from langchain.llms import OpenAI
 
-#### **1.2 Hỗ trợ học tập đa dạng**
-- ✅ **Học tập theo phong cách:** Thích ứng với phong cách học của từng học sinh
-- ✅ **Tạo mindmap:** Tạo sơ đồ tư duy cho các chủ đề
-- ✅ **Tóm tắt bài học:** Tạo tóm tắt ngắn gọn và dễ hiểu
-- ✅ **Tạo flashcard:** Tạo thẻ ghi nhớ cho từ vựng, công thức
-- ✅ **Giải thích bằng ví dụ:** Đưa ra ví dụ thực tế để minh họa
-
-#### **1.3 Tích hợp RAG System**
-- ✅ **Tìm kiếm trong tài liệu:** Tìm thông tin liên quan trong khóa học
-- ✅ **Nguồn tham khảo:** Đưa ra nguồn tham khảo cụ thể
-- ✅ **Confidence score:** Hiển thị độ tin cậy của câu trả lời
-- ✅ **Context-aware:** Hiểu ngữ cảnh học tập hiện tại
-
-### **2. TÍNH NĂNG PROGRESS AGENT (AI Theo dõi tiến độ)**
-
-#### **2.1 Phân tích tiến độ học tập**
-- ✅ **Theo dõi điểm số:** Phân tích xu hướng điểm số theo thời gian
-- ✅ **Phát hiện điểm mạnh/yếu:** Xác định môn học tốt và cần cải thiện
-- ✅ **So sánh với mục tiêu:** Đánh giá tiến độ so với mục tiêu đặt ra
-- ✅ **Phân tích xu hướng:** Dự đoán xu hướng học tập trong tương lai
-- ✅ **Đánh giá hiệu quả:** Đo lường hiệu quả học tập
-
-#### **2.2 Theo dõi thời gian học tập**
-- ✅ **Theo dõi thời gian theo môn:** Ghi nhận thời gian học từng môn
-- ✅ **Phân tích xu hướng thời gian:** Phân tích thời gian học hàng ngày/tuần
-- ✅ **So sánh thời gian với điểm số:** Tìm mối liên hệ giữa thời gian và kết quả
-- ✅ **Phát hiện môn bị bỏ quên:** Cảnh báo khi học sinh bỏ quên môn nào đó
-- ✅ **Đề xuất phân bổ thời gian:** Gợi ý cách phân bổ thời gian hợp lý
-
-#### **2.3 Nhắc nhở học tập thông minh**
-- ✅ **Nhắc nhở hàng ngày:** "Bạn chưa học Lý hôm nay"
-- ✅ **Nhắc nhở theo lịch:** "Đã đến giờ học Hóa (19:00)"
-- ✅ **Nhắc nhở theo tiến độ:** "Bạn đã bỏ quên Sinh 3 ngày liên tiếp"
-- ✅ **Nhắc nhở cân bằng:** "Bạn học Toán quá nhiều, hãy dành thời gian cho Lý"
-- ✅ **Nhắc nhở mục tiêu:** "Bạn còn 2 tuần để đạt mục tiêu điểm Lý 8.0"
-
-#### **2.4 Đề xuất cải thiện**
-- ✅ **Đề xuất tài liệu:** Gợi ý tài liệu học tập phù hợp
-- ✅ **Đề xuất phương pháp:** Gợi ý cách học hiệu quả hơn
-- ✅ **Đề xuất lịch học:** Tạo lịch học cá nhân hóa
-- ✅ **Đề xuất mục tiêu:** Đặt mục tiêu học tập phù hợp
-- ✅ **Đề xuất tài nguyên:** Gợi ý video, bài giảng, bài tập
-
-### **3. TÍNH NĂNG MOTIVATION AGENT (AI Động viên)**
-
-#### **3.1 Tạo động lực học tập**
-- ✅ **Động viên khi gặp khó khăn:** Khích lệ khi học sinh chán nản
-- ✅ **Khen ngợi thành tích:** Tán dương khi đạt được mục tiêu
-- ✅ **Tạo hứng thú:** Làm cho việc học trở nên thú vị
-- ✅ **Đặt mục tiêu nhỏ:** Chia nhỏ mục tiêu để dễ đạt được
-- ✅ **Tạo câu chuyện:** Kể câu chuyện thành công để truyền cảm hứng
-
-#### **3.2 Theo dõi tâm trạng**
-- ✅ **Phân tích tâm trạng:** Nhận biết khi học sinh stress, chán nản
-- ✅ **Điều chỉnh phong cách:** Thay đổi cách giao tiếp phù hợp
-- ✅ **Gửi lời khích lệ:** Gửi tin nhắn động viên kịp thời
-- ✅ **Tạo không khí tích cực:** Duy trì tinh thần lạc quan
-- ✅ **Hỗ trợ tâm lý:** Lắng nghe và thấu hiểu cảm xúc
-
-#### **3.3 Gamification**
-- ✅ **Hệ thống điểm:** Tích điểm khi hoàn thành nhiệm vụ
-- ✅ **Badge và thành tích:** Trao huy hiệu cho các cột mốc
-- ✅ **Bảng xếp hạng:** So sánh với bạn bè (nếu được phép)
-- ✅ **Thử thách:** Tạo thử thách học tập thú vị
-- ✅ **Mini-game:** Tạo game học tập để tăng hứng thú
-
-### **4. TÍNH NĂNG STUDENT COORDINATOR (Điều phối viên)**
-
-#### **4.1 Quản lý AI Agents**
-- ✅ **Phân tích câu hỏi:** Xác định loại câu hỏi và chọn Agent phù hợp
-- ✅ **Điều phối giao tiếp:** Quản lý luồng giao tiếp giữa các Agent
-- ✅ **Phân phối nhiệm vụ:** Giao nhiệm vụ cho Agent phù hợp
-- ✅ **Tổng hợp kết quả:** Kết hợp kết quả từ nhiều Agent
-- ✅ **Quản lý xung đột:** Giải quyết xung đột giữa các Agent
-
-#### **4.2 Quản lý mục tiêu học tập**
-- ✅ **Đặt mục tiêu:** Giúp học sinh đặt mục tiêu học tập
-- ✅ **Theo dõi tiến độ:** Giám sát tiến độ thực hiện mục tiêu
-- ✅ **Điều chỉnh mục tiêu:** Thay đổi mục tiêu khi cần thiết
-- ✅ **Đánh giá kết quả:** Đánh giá việc đạt được mục tiêu
-- ✅ **Lập kế hoạch:** Tạo kế hoạch học tập dài hạn
-
-### **5. TÍNH NĂNG RAG SYSTEM (Retrieval-Augmented Generation)**
-
-#### **5.1 Xử lý tài liệu**
-- ✅ **Trích xuất nội dung:** Lấy nội dung từ PDF, Word, PowerPoint
-- ✅ **Chia nhỏ tài liệu:** Chia tài liệu thành chunks phù hợp
-- ✅ **Tạo embeddings:** Tạo vector embeddings cho tài liệu
-- ✅ **Lưu trữ vector:** Lưu trữ trong vector database
-- ✅ **Cập nhật tự động:** Tự động cập nhật khi có tài liệu mới
-
-#### **5.2 Tìm kiếm thông minh**
-- ✅ **Semantic search:** Tìm kiếm theo nghĩa, không chỉ từ khóa
-- ✅ **Context-aware search:** Tìm kiếm dựa trên ngữ cảnh học tập
-- ✅ **Multi-modal search:** Tìm kiếm trong nhiều loại tài liệu
-- ✅ **Ranking kết quả:** Sắp xếp kết quả theo độ liên quan
-- ✅ **Filter kết quả:** Lọc kết quả theo tiêu chí
-
-#### **5.3 Tạo câu trả lời**
-- ✅ **Context-aware generation:** Tạo câu trả lời dựa trên ngữ cảnh
-- ✅ **Source attribution:** Ghi rõ nguồn tham khảo
-- ✅ **Confidence scoring:** Đánh giá độ tin cậy của câu trả lời
-- ✅ **Multi-step reasoning:** Lý luận nhiều bước cho câu hỏi phức tạp
-- ✅ **Personalized response:** Cá nhân hóa câu trả lời theo học sinh
-
-### **6. TÍNH NĂNG LANGCHAIN INTEGRATION**
-
-#### **6.1 Xử lý ngôn ngữ tự nhiên**
-- ✅ **Hiểu câu hỏi:** Phân tích ý định và nội dung câu hỏi
-- ✅ **Xử lý đa ngôn ngữ:** Hỗ trợ tiếng Việt và tiếng Anh
-- ✅ **Xử lý ngữ cảnh:** Hiểu ngữ cảnh cuộc trò chuyện
-- ✅ **Xử lý câu hỏi phức tạp:** Giải quyết câu hỏi nhiều phần
-- ✅ **Xử lý lỗi chính tả:** Tự động sửa lỗi chính tả
-
-#### **6.2 Quản lý bộ nhớ**
-- ✅ **Conversation memory:** Lưu trữ lịch sử cuộc trò chuyện
-- ✅ **Long-term memory:** Ghi nhớ thông tin dài hạn về học sinh
-- ✅ **Context memory:** Lưu trữ ngữ cảnh học tập
-- ✅ **Preference memory:** Ghi nhớ sở thích và thói quen
-- ✅ **Achievement memory:** Lưu trữ thành tích và tiến bộ
-
-#### **6.3 Tích hợp công cụ AI**
-- ✅ **Multi-LLM support:** Hỗ trợ nhiều LLM (GPT-4, Claude, Ollama)
-- ✅ **Tool integration:** Tích hợp các công cụ bên ngoài
-- ✅ **API integration:** Kết nối với các API khác
-- ✅ **Plugin system:** Hệ thống plugin mở rộng
-- ✅ **Custom tools:** Tạo công cụ tùy chỉnh
-
-### **7. TÍNH NĂNG MCP SERVER**
-
-#### **7.1 Giao tiếp và đồng bộ**
-- ✅ **Real-time communication:** Giao tiếp real-time giữa các components
-- ✅ **Data synchronization:** Đồng bộ dữ liệu giữa các hệ thống
-- ✅ **Context sharing:** Chia sẻ ngữ cảnh giữa các Agent
-- ✅ **Event handling:** Xử lý sự kiện và thông báo
-- ✅ **Message routing:** Định tuyến tin nhắn đến đúng Agent
-
-#### **7.2 Quản lý phiên học tập**
-- ✅ **Session management:** Quản lý phiên học tập
-- ✅ **State persistence:** Lưu trữ trạng thái học tập
-- ✅ **Resume session:** Tiếp tục phiên học tập bị gián đoạn
-- ✅ **Multi-session support:** Hỗ trợ nhiều phiên đồng thời
-- ✅ **Session analytics:** Phân tích dữ liệu phiên học tập
-
-### **8. TÍNH NĂNG TÍCH HỢP MOODLE**
-
-#### **8.1 Tích hợp dữ liệu**
-- ✅ **Course data extraction:** Trích xuất dữ liệu khóa học
-- ✅ **User data integration:** Tích hợp dữ liệu người dùng
-- ✅ **Grade integration:** Tích hợp với hệ thống điểm
-- ✅ **Activity tracking:** Theo dõi hoạt động học tập
-- ✅ **Resource access:** Truy cập tài nguyên khóa học
-
-#### **8.2 Tích hợp giao diện**
-- ✅ **Moodle plugin:** Tích hợp như plugin Moodle
-- ✅ **Single sign-on:** Đăng nhập một lần
-- ✅ **Theme integration:** Tích hợp với theme Moodle
-- ✅ **Mobile responsive:** Tương thích mobile
-- ✅ **Accessibility:** Hỗ trợ người khuyết tật
-
-### **9. TÍNH NĂNG BÁO CÁO VÀ PHÂN TÍCH**
-
-#### **9.1 Báo cáo tiến độ**
-- ✅ **Báo cáo hàng ngày:** Tóm tắt hoạt động trong ngày
-- ✅ **Báo cáo hàng tuần:** Phân tích tiến độ tuần
-- ✅ **Báo cáo hàng tháng:** Đánh giá tiến độ dài hạn
-- ✅ **Báo cáo tùy chỉnh:** Tạo báo cáo theo yêu cầu
-- ✅ **Export báo cáo:** Xuất báo cáo ra PDF, Excel
-
-#### **9.2 Phân tích dữ liệu**
-- ✅ **Learning analytics:** Phân tích dữ liệu học tập
-- ✅ **Performance analysis:** Phân tích hiệu suất học tập
-- ✅ **Trend analysis:** Phân tích xu hướng học tập
-- ✅ **Predictive analysis:** Dự đoán kết quả học tập
-- ✅ **Comparative analysis:** So sánh với học sinh khác
-
-### **10. TÍNH NĂNG CÁ NHÂN HÓA**
-
-#### **10.1 Học tập cá nhân hóa**
-- ✅ **Learning style detection:** Phát hiện phong cách học
-- ✅ **Personalized content:** Nội dung học tập cá nhân hóa
-- ✅ **Adaptive learning path:** Đường dẫn học tập thích ứng
-- ✅ **Custom recommendations:** Đề xuất tùy chỉnh
-- ✅ **Personalized goals:** Mục tiêu cá nhân hóa
-
-#### **10.2 Giao diện cá nhân hóa**
-- ✅ **Customizable dashboard:** Dashboard tùy chỉnh
-- ✅ **Personalized themes:** Chủ đề giao diện cá nhân
-- ✅ **Custom widgets:** Widget tùy chỉnh
-- ✅ **Personalized notifications:** Thông báo cá nhân hóa
-- ✅ **Custom shortcuts:** Phím tắt tùy chỉnh
-
-### **11. TÍNH NĂNG BẢO MẬT VÀ PRIVACY**
-
-#### **11.1 Bảo mật dữ liệu**
-- ✅ **Data encryption:** Mã hóa dữ liệu
-- ✅ **Secure communication:** Giao tiếp bảo mật
-- ✅ **Access control:** Kiểm soát truy cập
-- ✅ **Audit logging:** Ghi log kiểm tra
-- ✅ **Data backup:** Sao lưu dữ liệu
-
-#### **11.2 Privacy protection**
-- ✅ **Data anonymization:** Ẩn danh hóa dữ liệu
-- ✅ **Consent management:** Quản lý đồng ý
-- ✅ **Data retention:** Chính sách lưu trữ dữ liệu
-- ✅ **Right to deletion:** Quyền xóa dữ liệu
-- ✅ **Privacy settings:** Cài đặt riêng tư
-
-### **12. TÍNH NĂNG MỞ RỘNG VÀ TÍCH HỢP**
-
-#### **12.1 API và Webhook**
-- ✅ **RESTful API:** API RESTful đầy đủ
-- ✅ **GraphQL API:** API GraphQL
-- ✅ **Webhook support:** Hỗ trợ webhook
-- ✅ **Third-party integration:** Tích hợp bên thứ ba
-- ✅ **Custom API:** API tùy chỉnh
-
-#### **12.2 Plugin và Extension**
-- ✅ **Plugin architecture:** Kiến trúc plugin
-- ✅ **Extension system:** Hệ thống mở rộng
-- ✅ **Custom tools:** Công cụ tùy chỉnh
-- ✅ **Third-party plugins:** Plugin bên thứ ba
-- ✅ **Plugin marketplace:** Chợ plugin
-
----
-
-## 🔄 **FLOW HOẠT ĐỘNG CỦA HỆ THỐNG**
-
-### **📋 TỔNG QUAN FLOW**
-
-```
-Học sinh đặt câu hỏi → Student Coordinator → Phân tích và chọn Agent → 
-RAG System tìm tài liệu → AI Agent xử lý → MCP Server đồng bộ → 
-Trả về câu trả lời → Lưu trữ và cập nhật
+class MoodleRAGSystem:
+    def __init__(self, config):
+        self.config = config
+        self.embeddings = OpenAIEmbeddings(openai_api_key=config["openai_key"])
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200
+        )
+        self.vectorstore = None
+        
+    def process_moodle_documents(self, course_id):
+        """Xử lý tài liệu Moodle"""
+        # Lấy tài liệu từ Moodle
+        documents = self.get_moodle_documents(course_id)
+        
+        # Chia nhỏ tài liệu
+        chunks = self.text_splitter.split_documents(documents)
+        
+        # Tạo embeddings và lưu vào vector store
+        self.vectorstore = Chroma.from_documents(
+            documents=chunks,
+            embedding=self.embeddings,
+            persist_directory=f"./vector_db/course_{course_id}"
+        )
+        
+        return len(chunks)
+    
+    def get_moodle_documents(self, course_id):
+        """Lấy tài liệu từ Moodle database"""
+        # Kết nối với Moodle database
+        moodle_docs = self.query_moodle_files(course_id)
+        
+        documents = []
+        for doc in moodle_docs:
+            if doc["mimetype"] == "application/pdf":
+                # Xử lý PDF
+                loader = PyPDFLoader(doc["filepath"])
+                pdf_docs = loader.load()
+                for pdf_doc in pdf_docs:
+                    pdf_doc.metadata.update({
+                        "course_id": course_id,
+                        "filename": doc["filename"],
+                        "source": "moodle"
+                    })
+                documents.extend(pdf_docs)
+            elif doc["mimetype"] == "text/plain":
+                # Xử lý text files
+                with open(doc["filepath"], 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    documents.append({
+                        "page_content": content,
+                        "metadata": {
+                            "course_id": course_id,
+                            "filename": doc["filename"],
+                            "source": "moodle"
+                        }
+                    })
+        
+        return documents
+    
+    def query_moodle_files(self, course_id):
+        """Query files từ Moodle database"""
+        # Sử dụng PHP bridge để lấy dữ liệu
+        import subprocess
+        import json
+        
+        result = subprocess.run([
+            "php", 
+            "../moodle_bridge.php", 
+            "get_course_files", 
+            str(course_id)
+        ], capture_output=True, text=True)
+        
+        return json.loads(result.stdout)
+    
+    def search_relevant_content(self, query, course_id, top_k=5):
+        """Tìm kiếm nội dung liên quan"""
+        if not self.vectorstore:
+            self.load_vectorstore(course_id)
+        
+        # Tìm kiếm tương tự
+        docs = self.vectorstore.similarity_search(
+            query, 
+            k=top_k,
+            filter={"course_id": course_id}
+        )
+        
+        return {
+            "content": [doc.page_content for doc in docs],
+            "sources": [doc.metadata for doc in docs],
+            "confidence": self.calculate_confidence(docs, query)
+        }
+    
+    def create_qa_chain(self, course_id):
+        """Tạo QA chain cho khóa học"""
+        if not self.vectorstore:
+            self.load_vectorstore(course_id)
+        
+        retriever = self.vectorstore.as_retriever(
+            search_kwargs={"k": 3, "filter": {"course_id": course_id}}
+        )
+        
+        qa_chain = RetrievalQA.from_chain_type(
+            llm=OpenAI(temperature=0.7),
+            chain_type="stuff",
+            retriever=retriever,
+            return_source_documents=True
+        )
+        
+        return qa_chain
 ```
 
-### **🔍 FLOW CHI TIẾT**
+### 3.2 Vector Database Management
 
-#### **Bước 1: Học sinh đặt câu hỏi**
-```
-Học sinh: "Tôi không biết giải bài này: x² + 5x + 6 = 0"
-↓
-Frontend (React.js) nhận input
-↓
-Gửi request đến Backend API
-```
+```python
+# local/aichatbot/python/rag/vector_manager.py
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+import os
+import json
 
-#### **Bước 2: Student Coordinator phân tích**
-```
-Student Coordinator nhận câu hỏi
-↓
-Phân tích câu hỏi:
-- Loại: Bài tập Toán
-- Mức độ: Cơ bản
-- Chủ đề: Phương trình bậc 2
-↓
-Chọn Agent phù hợp: Study Agent
-↓
-Chuẩn bị context: Lấy thông tin khóa học hiện tại
-```
-
-#### **Bước 3: RAG System tìm kiếm tài liệu**
-```
-Study Agent kích hoạt RAG System
-↓
-RAG Pipeline:
-1. Tạo embedding cho câu hỏi
-2. Tìm kiếm similarity trong vector database
-3. Lấy top 5 chunks liên quan nhất
-4. Tìm thấy: "Toán học 10, Chương 2: Phương trình bậc 2"
-↓
-Trả về context: Tài liệu + Confidence score
-```
-
-#### **Bước 4: Study Agent xử lý**
-```
-Study Agent nhận context từ RAG
-↓
-LangChain xử lý:
-1. Tạo prompt với context
-2. Gửi đến LLM (GPT-4/Ollama)
-3. LLM tạo câu trả lời dựa trên tài liệu
-↓
-Kết quả: Giải bài tập từng bước + Nguồn tham khảo
-```
-
-#### **Bước 5: MCP Server đồng bộ**
-```
-MCP Server nhận kết quả từ Study Agent
-↓
-Đồng bộ dữ liệu:
-1. Lưu câu hỏi và câu trả lời
-2. Cập nhật tiến độ học tập
-3. Ghi nhận thời gian học
-4. Cập nhật context cho các Agent khác
-↓
-Gửi thông báo đến Progress Agent
-```
-
-#### **Bước 6: Progress Agent cập nhật**
-```
-Progress Agent nhận thông báo
-↓
-Phân tích và cập nhật:
-1. Ghi nhận hoạt động học tập
-2. Cập nhật thời gian học môn Toán
-3. Phân tích tiến độ
-4. Tạo nhắc nhở nếu cần
-↓
-Lưu vào database
-```
-
-#### **Bước 7: Trả về câu trả lời**
-```
-MCP Server trả về kết quả cuối cùng
-↓
-Backend API xử lý response
-↓
-Frontend hiển thị:
-- Câu trả lời chi tiết
-- Nguồn tham khảo
-- Confidence score
-- Gợi ý bài tập tương tự
-```
-
-### **🎯 FLOW CHO TỪNG LOẠI CÂU HỎI**
-
-#### **Flow 1: Câu hỏi học tập (Study Agent)**
-```
-Học sinh: "Định lý Bayes là gì?"
-↓
-Student Coordinator → Study Agent
-↓
-RAG System tìm tài liệu "Xác suất thống kê"
-↓
-Study Agent tạo câu trả lời với RAG
-↓
-MCP Server đồng bộ
-↓
-Trả về: Giải thích + Nguồn tham khảo + Confidence 95%
-```
-
-#### **Flow 2: Câu hỏi tiến độ (Progress Agent)**
-```
-Học sinh: "Tôi học như thế nào tuần này?"
-↓
-Student Coordinator → Progress Agent
-↓
-Progress Agent phân tích:
-- Lấy dữ liệu từ Moodle
-- Phân tích thời gian học
-- So sánh với mục tiêu
-↓
-MCP Server đồng bộ
-↓
-Trả về: Báo cáo tiến độ + Đề xuất cải thiện
-```
-
-#### **Flow 3: Câu hỏi động viên (Motivation Agent)**
-```
-Học sinh: "Tôi chán học quá, muốn bỏ cuộc"
-↓
-Student Coordinator → Motivation Agent
-↓
-Motivation Agent:
-- Phân tích tâm trạng
-- Tìm câu chuyện thành công (RAG)
-- Tạo lời động viên
-↓
-MCP Server đồng bộ
-↓
-Trả về: Lời động viên + Câu chuyện + Mục tiêu nhỏ
-```
-
-#### **Flow 4: Câu hỏi phức tạp (Nhiều Agent)**
-```
-Học sinh: "Tôi muốn cải thiện điểm Lý, nhưng không biết bắt đầu từ đâu"
-↓
-Student Coordinator phân tích:
-- Đây là câu hỏi phức tạp
-- Cần nhiều Agent xử lý
-↓
-Giao nhiệm vụ:
-- Progress Agent: Phân tích điểm Lý hiện tại
-- Study Agent: Tìm tài liệu cải thiện (RAG)
-- Motivation Agent: Tạo động lực
-↓
-Student Coordinator tổng hợp kết quả
-↓
-Trả về: Kế hoạch cải thiện toàn diện
-```
-
-### **⚡ FLOW REAL-TIME**
-
-#### **WebSocket Connection**
-```
-Học sinh mở chat
-↓
-WebSocket connection được thiết lập
-↓
-Real-time communication:
-- Typing indicator
-- Message streaming
-- Progress updates
-- Notifications
-```
-
-#### **Session Management**
-```
-MCP Server quản lý session:
-1. Tạo session ID
-2. Lưu trạng thái học tập
-3. Theo dõi hoạt động
-4. Cập nhật real-time
-5. Lưu trữ khi kết thúc
-```
-
-### **🔄 FLOW CẬP NHẬT DỮ LIỆU**
-
-#### **Cập nhật tài liệu mới**
-```
-Giáo viên upload tài liệu mới
-↓
-File Watcher phát hiện
-↓
-RAG System xử lý:
-1. Trích xuất nội dung
-2. Chia nhỏ thành chunks
-3. Tạo embeddings
-4. Lưu vào vector database
-↓
-Thông báo đến tất cả Agent
-↓
-Agent cập nhật context
-```
-
-#### **Cập nhật tiến độ học tập**
-```
-Học sinh hoàn thành bài tập
-↓
-Moodle cập nhật điểm
-↓
-Progress Agent nhận thông báo
-↓
-Phân tích và cập nhật:
-1. Cập nhật điểm số
-2. Phân tích xu hướng
-3. Tạo nhắc nhở mới
-4. Đề xuất cải thiện
-↓
-Lưu vào database
-```
-
-### **📊 FLOW PHÂN TÍCH VÀ BÁO CÁO**
-
-#### **Báo cáo hàng ngày**
-```
-Cuối ngày (23:59)
-↓
-Progress Agent tự động chạy
-↓
-Phân tích dữ liệu ngày:
-1. Thời gian học theo môn
-2. Số câu hỏi đã hỏi
-3. Tiến độ hoàn thành
-4. Điểm số mới
-↓
-Tạo báo cáo
-↓
-Gửi đến học sinh
-```
-
-#### **Báo cáo tuần**
-```
-Cuối tuần (Chủ nhật)
-↓
-Progress Agent phân tích tuần
-↓
-Tạo báo cáo chi tiết:
-1. Tổng kết tuần
-2. So sánh với mục tiêu
-3. Đề xuất tuần tới
-4. Nhắc nhở quan trọng
-↓
-Gửi báo cáo + Lịch học tuần tới
-```
-
-### **🚨 FLOW XỬ LÝ LỖI**
-
-#### **Khi RAG System lỗi**
-```
-RAG System không tìm thấy tài liệu
-↓
-Study Agent chuyển sang mode fallback
-↓
-Sử dụng LLM trực tiếp (không có context)
-↓
-Trả về câu trả lời + Cảnh báo "Không có nguồn tham khảo"
-```
-
-#### **Khi LLM không khả dụng**
-```
-LLM API gặp lỗi
-↓
-Hệ thống chuyển sang LLM backup
-↓
-Nếu tất cả LLM đều lỗi
-↓
-Trả về: "Hệ thống đang bảo trì, vui lòng thử lại sau"
-```
-
-### **💾 FLOW LƯU TRỮ DỮ LIỆU**
-
-#### **Lưu trữ cuộc trò chuyện**
-```
-Mỗi câu hỏi và câu trả lời
-↓
-Lưu vào database:
-- Câu hỏi
-- Câu trả lời
-- Agent xử lý
-- Context sử dụng
-- Confidence score
-- Thời gian
-- User ID
-```
-
-#### **Lưu trữ tiến độ học tập**
-```
-Mỗi hoạt động học tập
-↓
-Lưu vào database:
-- Môn học
-- Thời gian học
-- Số câu hỏi
-- Điểm số
-- Tiến độ
-- Mục tiêu
+class VectorDatabaseManager:
+    def __init__(self, config):
+        self.config = config
+        self.base_path = config["vector_db_path"]
+        self.embeddings = OpenAIEmbeddings(openai_api_key=config["openai_key"])
+        
+    def create_course_vectorstore(self, course_id, documents):
+        """Tạo vector store cho khóa học"""
+        persist_directory = os.path.join(self.base_path, f"course_{course_id}")
+        
+        vectorstore = Chroma.from_documents(
+            documents=documents,
+            embedding=self.embeddings,
+            persist_directory=persist_directory
+        )
+        
+        # Lưu metadata
+        self.save_course_metadata(course_id, {
+            "document_count": len(documents),
+            "created_at": datetime.now().isoformat(),
+            "last_updated": datetime.now().isoformat()
+        })
+        
+        return vectorstore
+    
+    def load_course_vectorstore(self, course_id):
+        """Load vector store của khóa học"""
+        persist_directory = os.path.join(self.base_path, f"course_{course_id}")
+        
+        if not os.path.exists(persist_directory):
+            return None
+        
+        vectorstore = Chroma(
+            persist_directory=persist_directory,
+            embedding_function=self.embeddings
+        )
+        
+        return vectorstore
+    
+    def update_course_vectorstore(self, course_id, new_documents):
+        """Cập nhật vector store"""
+        vectorstore = self.load_course_vectorstore(course_id)
+        
+        if vectorstore:
+            # Thêm documents mới
+            vectorstore.add_documents(new_documents)
+        else:
+            # Tạo mới
+            vectorstore = self.create_course_vectorstore(course_id, new_documents)
+        
+        # Cập nhật metadata
+        self.update_course_metadata(course_id, {
+            "last_updated": datetime.now().isoformat()
+        })
+        
+        return vectorstore
+    
+    def search_across_courses(self, query, user_courses, top_k=10):
+        """Tìm kiếm across nhiều khóa học"""
+        all_results = []
+        
+        for course_id in user_courses:
+            vectorstore = self.load_course_vectorstore(course_id)
+            if vectorstore:
+                results = vectorstore.similarity_search_with_score(query, k=top_k)
+                for doc, score in results:
+                    all_results.append({
+                        "content": doc.page_content,
+                        "metadata": doc.metadata,
+                        "score": score,
+                        "course_id": course_id
+                    })
+        
+        # Sắp xếp theo score
+        all_results.sort(key=lambda x: x["score"])
+        
+        return all_results[:top_k]
+    
+    def save_course_metadata(self, course_id, metadata):
+        """Lưu metadata khóa học"""
+        metadata_path = os.path.join(self.base_path, f"course_{course_id}_metadata.json")
+        with open(metadata_path, 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, ensure_ascii=False, indent=2)
+    
+    def get_course_metadata(self, course_id):
+        """Lấy metadata khóa học"""
+        metadata_path = os.path.join(self.base_path, f"course_{course_id}_metadata.json")
+        if os.path.exists(metadata_path):
+            with open(metadata_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return None
 ```
 
 ---
 
-## 🛠️ **CÔNG NGHỆ SỬ DỤNG**
+## 4. MCP SERVER INTEGRATION
 
-### **Backend:**
-- **Python 3.9+:** LangChain, RAG System, MCP Server
-- **PHP:** Tích hợp với Moodle
-- **FastAPI:** Web framework cho Python
-- **PostgreSQL:** Cơ sở dữ liệu chính
-- **Redis:** Cache và session storage
+### 4.1 MCP Server Architecture
 
-### **AI/ML:**
-- **LangChain:** Xử lý ngôn ngữ tự nhiên
-- **RAG:** Retrieval-Augmented Generation
-- **OpenAI GPT-4/Claude:** Large Language Models
-- **Ollama:** Local AI models
-- **Hugging Face Transformers:** Pre-trained models
-- **Sentence Transformers:** Embeddings
+MCP (Model Context Protocol) Server sẽ đóng vai trò trung gian giữa AI Agents và các Moodle services, cho phép agents tương tác trực tiếp với hệ thống Moodle.
 
-### **Frontend:**
-- **React.js:** Giao diện chat
-- **React Native:** Mobile app
-- **WebSocket:** Real-time communication
-- **PWA:** Progressive Web App
+#### **4.1.1 MCP Server Structure**
+```python
+# local/aichatbot/python/mcp/mcp_server.py
+import asyncio
+import json
+from typing import Dict, List, Any, Optional
+from mcp.server import Server
+from mcp.server.models import InitializationOptions
+from mcp.server.stdio import stdio_server
+from mcp.types import (
+    Resource, Tool, TextContent, ImageContent, 
+    EmbeddedResource, LoggingLevel
+)
 
-### **Infrastructure:**
-- **Docker:** Containerization
-- **Kubernetes:** Container orchestration
-- **AWS/Azure:** Cloud deployment
-- **CI/CD:** GitHub Actions
+class MoodleMCPServer:
+    def __init__(self, moodle_tools, rag_system):
+        self.moodle_tools = moodle_tools
+        self.rag_system = rag_system
+        self.server = Server("moodle-ai-server")
+        self.setup_handlers()
+    
+    def setup_handlers(self):
+        """Setup MCP handlers"""
+        
+        @self.server.list_tools()
+        async def handle_list_tools() -> List[Tool]:
+            """List available tools"""
+            return [
+                Tool(
+                    name="get_course_content",
+                    description="Lấy nội dung khóa học từ Moodle",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "course_id": {"type": "integer", "description": "ID khóa học"},
+                            "content_type": {"type": "string", "description": "Loại nội dung (files, quizzes, assignments)"}
+                        },
+                        "required": ["course_id"]
+                    }
+                ),
+                Tool(
+                    name="get_user_progress",
+                    description="Lấy tiến độ học tập của học viên",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "user_id": {"type": "integer", "description": "ID học viên"},
+                            "course_id": {"type": "integer", "description": "ID khóa học"}
+                        },
+                        "required": ["user_id"]
+                    }
+                ),
+                Tool(
+                    name="search_course_documents",
+                    description="Tìm kiếm tài liệu trong khóa học",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "query": {"type": "string", "description": "Từ khóa tìm kiếm"},
+                            "course_id": {"type": "integer", "description": "ID khóa học"},
+                            "limit": {"type": "integer", "description": "Số lượng kết quả", "default": 5}
+                        },
+                        "required": ["query"]
+                    }
+                ),
+                Tool(
+                    name="create_learning_activity",
+                    description="Tạo hoạt động học tập mới",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "user_id": {"type": "integer", "description": "ID học viên"},
+                            "activity_type": {"type": "string", "description": "Loại hoạt động"},
+                            "content": {"type": "string", "description": "Nội dung hoạt động"},
+                            "course_id": {"type": "integer", "description": "ID khóa học"}
+                        },
+                        "required": ["user_id", "activity_type", "content"]
+                    }
+                ),
+                Tool(
+                    name="send_notification",
+                    description="Gửi thông báo cho học viên",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "user_id": {"type": "integer", "description": "ID học viên"},
+                            "message": {"type": "string", "description": "Nội dung thông báo"},
+                            "type": {"type": "string", "description": "Loại thông báo", "default": "info"}
+                        },
+                        "required": ["user_id", "message"]
+                    }
+                ),
+                Tool(
+                    name="analyze_quiz_results",
+                    description="Phân tích kết quả quiz của học viên",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "user_id": {"type": "integer", "description": "ID học viên"},
+                            "quiz_id": {"type": "integer", "description": "ID quiz"},
+                            "course_id": {"type": "integer", "description": "ID khóa học"}
+                        },
+                        "required": ["user_id", "quiz_id"]
+                    }
+                ),
+                Tool(
+                    name="generate_practice_questions",
+                    description="Tạo câu hỏi luyện tập dựa trên chủ đề",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "topic": {"type": "string", "description": "Chủ đề"},
+                            "difficulty": {"type": "string", "description": "Độ khó", "default": "medium"},
+                            "count": {"type": "integer", "description": "Số lượng câu hỏi", "default": 5}
+                        },
+                        "required": ["topic"]
+                    }
+                ),
+                Tool(
+                    name="get_learning_recommendations",
+                    description="Đưa ra khuyến nghị học tập cho học viên",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "user_id": {"type": "integer", "description": "ID học viên"},
+                            "course_id": {"type": "integer", "description": "ID khóa học"},
+                            "analysis_type": {"type": "string", "description": "Loại phân tích", "default": "comprehensive"}
+                        },
+                        "required": ["user_id"]
+                    }
+                )
+            ]
+        
+        @self.server.call_tool()
+        async def handle_call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
+            """Handle tool calls"""
+            try:
+                if name == "get_course_content":
+                    result = await self.get_course_content(
+                        arguments["course_id"],
+                        arguments.get("content_type", "all")
+                    )
+                elif name == "get_user_progress":
+                    result = await self.get_user_progress(
+                        arguments["user_id"],
+                        arguments.get("course_id")
+                    )
+                elif name == "search_course_documents":
+                    result = await self.search_course_documents(
+                        arguments["query"],
+                        arguments.get("course_id"),
+                        arguments.get("limit", 5)
+                    )
+                elif name == "create_learning_activity":
+                    result = await self.create_learning_activity(
+                        arguments["user_id"],
+                        arguments["activity_type"],
+                        arguments["content"],
+                        arguments.get("course_id")
+                    )
+                elif name == "send_notification":
+                    result = await self.send_notification(
+                        arguments["user_id"],
+                        arguments["message"],
+                        arguments.get("type", "info")
+                    )
+                elif name == "analyze_quiz_results":
+                    result = await self.analyze_quiz_results(
+                        arguments["user_id"],
+                        arguments["quiz_id"],
+                        arguments.get("course_id")
+                    )
+                elif name == "generate_practice_questions":
+                    result = await self.generate_practice_questions(
+                        arguments["topic"],
+                        arguments.get("difficulty", "medium"),
+                        arguments.get("count", 5)
+                    )
+                elif name == "get_learning_recommendations":
+                    result = await self.get_learning_recommendations(
+                        arguments["user_id"],
+                        arguments.get("course_id"),
+                        arguments.get("analysis_type", "comprehensive")
+                    )
+                else:
+                    result = {"error": f"Unknown tool: {name}"}
+                
+                return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
+                
+            except Exception as e:
+                return [TextContent(type="text", text=json.dumps({"error": str(e)}, ensure_ascii=False))]
+    
+    async def get_course_content(self, course_id: int, content_type: str = "all") -> Dict[str, Any]:
+        """Tool: Lấy nội dung khóa học"""
+        try:
+            content = self.moodle_tools.get_course_content(course_id)
+            
+            if content_type == "files":
+                content = [item for item in content if item.get("type") == "file"]
+            elif content_type == "quizzes":
+                content = [item for item in content if item.get("type") == "quiz"]
+            elif content_type == "assignments":
+                content = [item for item in content if item.get("type") == "assignment"]
+            
+            return {
+                "success": True,
+                "course_id": course_id,
+                "content_type": content_type,
+                "items": content,
+                "count": len(content)
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def get_user_progress(self, user_id: int, course_id: Optional[int] = None) -> Dict[str, Any]:
+        """Tool: Lấy tiến độ học viên"""
+        try:
+            progress = self.moodle_tools.get_user_progress(user_id, course_id)
+            return {
+                "success": True,
+                "user_id": user_id,
+                "course_id": course_id,
+                "progress": progress
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def search_course_documents(self, query: str, course_id: Optional[int] = None, limit: int = 5) -> Dict[str, Any]:
+        """Tool: Tìm kiếm tài liệu"""
+        try:
+            results = self.rag_system.search_relevant_content(query, course_id, limit)
+            return {
+                "success": True,
+                "query": query,
+                "course_id": course_id,
+                "results": results,
+                "count": len(results.get("content", []))
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def create_learning_activity(self, user_id: int, activity_type: str, content: str, course_id: Optional[int] = None) -> Dict[str, Any]:
+        """Tool: Tạo hoạt động học tập"""
+        try:
+            activity_data = {
+                "type": activity_type,
+                "content": content,
+                "course_id": course_id,
+                "created_at": datetime.now().isoformat()
+            }
+            
+            success = self.moodle_tools.create_learning_activity(user_id, activity_data)
+            return {
+                "success": success,
+                "user_id": user_id,
+                "activity_type": activity_type,
+                "activity_id": activity_data.get("id") if success else None
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def send_notification(self, user_id: int, message: str, type: str = "info") -> Dict[str, Any]:
+        """Tool: Gửi thông báo"""
+        try:
+            success = self.moodle_tools.send_notification(user_id, message, type)
+            return {
+                "success": success,
+                "user_id": user_id,
+                "message": message,
+                "type": type
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def analyze_quiz_results(self, user_id: int, quiz_id: int, course_id: Optional[int] = None) -> Dict[str, Any]:
+        """Tool: Phân tích kết quả quiz"""
+        try:
+            quiz_results = self.moodle_tools.get_quiz_results(user_id, course_id)
+            quiz_data = [result for result in quiz_results if result.get("quiz_id") == quiz_id]
+            
+            if not quiz_data:
+                return {"success": False, "error": "Quiz not found"}
+            
+            # Phân tích kết quả
+            analysis = {
+                "total_questions": quiz_data[0].get("total_questions", 0),
+                "correct_answers": quiz_data[0].get("correct_answers", 0),
+                "score_percentage": quiz_data[0].get("score_percentage", 0),
+                "time_taken": quiz_data[0].get("time_taken", 0),
+                "weak_areas": self.identify_weak_areas(quiz_data[0]),
+                "recommendations": self.generate_quiz_recommendations(quiz_data[0])
+            }
+            
+            return {
+                "success": True,
+                "user_id": user_id,
+                "quiz_id": quiz_id,
+                "analysis": analysis
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def generate_practice_questions(self, topic: str, difficulty: str = "medium", count: int = 5) -> Dict[str, Any]:
+        """Tool: Tạo câu hỏi luyện tập"""
+        try:
+            questions = self.rag_system.generate_questions(topic, difficulty, count)
+            return {
+                "success": True,
+                "topic": topic,
+                "difficulty": difficulty,
+                "questions": questions,
+                "count": len(questions)
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def get_learning_recommendations(self, user_id: int, course_id: Optional[int] = None, analysis_type: str = "comprehensive") -> Dict[str, Any]:
+        """Tool: Đưa ra khuyến nghị học tập"""
+        try:
+            # Lấy dữ liệu học viên
+            user_data = self.moodle_tools.get_comprehensive_data(user_id, course_id)
+            
+            # Phân tích và đưa ra khuyến nghị
+            recommendations = {
+                "learning_path": self.suggest_learning_path(user_data),
+                "weak_areas": self.identify_weak_areas(user_data),
+                "study_schedule": self.create_study_schedule(user_data),
+                "resources": self.recommend_resources(user_data),
+                "goals": self.set_learning_goals(user_data)
+            }
+            
+            return {
+                "success": True,
+                "user_id": user_id,
+                "course_id": course_id,
+                "analysis_type": analysis_type,
+                "recommendations": recommendations
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def identify_weak_areas(self, data: Dict[str, Any]) -> List[str]:
+        """Xác định điểm yếu"""
+        weak_areas = []
+        
+        if data.get("score_percentage", 0) < 70:
+            weak_areas.append("Kiến thức cơ bản")
+        
+        if data.get("time_taken", 0) > data.get("average_time", 0) * 1.5:
+            weak_areas.append("Tốc độ xử lý")
+        
+        # Thêm logic phân tích khác
+        return weak_areas
+    
+    def generate_quiz_recommendations(self, quiz_data: Dict[str, Any]) -> List[str]:
+        """Tạo khuyến nghị từ kết quả quiz"""
+        recommendations = []
+        
+        if quiz_data.get("score_percentage", 0) < 60:
+            recommendations.append("Cần ôn tập lại kiến thức cơ bản")
+        
+        if quiz_data.get("time_taken", 0) > quiz_data.get("time_limit", 0) * 0.8:
+            recommendations.append("Cần cải thiện tốc độ làm bài")
+        
+        return recommendations
+    
+    def suggest_learning_path(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Đề xuất lộ trình học tập"""
+        return {
+            "current_level": user_data.get("current_level", "beginner"),
+            "next_topics": ["Topic A", "Topic B", "Topic C"],
+            "estimated_time": "2-3 tuần",
+            "prerequisites": ["Basic knowledge"]
+        }
+    
+    def create_study_schedule(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Tạo lịch học"""
+        return {
+            "daily_study_time": "1-2 giờ",
+            "weekly_schedule": ["Thứ 2, 4, 6"],
+            "break_intervals": "25 phút học, 5 phút nghỉ"
+        }
+    
+    def recommend_resources(self, user_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Đề xuất tài liệu"""
+        return [
+            {"type": "video", "title": "Video giảng dạy", "url": "..."},
+            {"type": "document", "title": "Tài liệu tham khảo", "url": "..."},
+            {"type": "quiz", "title": "Bài tập luyện tập", "url": "..."}
+        ]
+    
+    def set_learning_goals(self, user_data: Dict[str, Any]) -> List[str]:
+        """Đặt mục tiêu học tập"""
+        return [
+            "Hoàn thành 80% nội dung khóa học",
+            "Đạt điểm trung bình trên 7.0",
+            "Tham gia tích cực các hoạt động"
+        ]
+
+async def main():
+    """Main function to run MCP server"""
+    # Initialize dependencies
+    moodle_tools = MoodleTools(config)
+    rag_system = MoodleRAGSystem(config)
+    
+    # Create MCP server
+    server = MoodleMCPServer(moodle_tools, rag_system)
+    
+    # Run server
+    async with stdio_server() as (read_stream, write_stream):
+        await server.server.run(
+            read_stream,
+            write_stream,
+            InitializationOptions(
+                server_name="moodle-ai-server",
+                server_version="1.0.0",
+                capabilities=server.server.get_capabilities(
+                    notification_options=None,
+                    experimental_capabilities=None
+                )
+            )
+        )
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 4.2 MCP Client Integration
+
+#### **4.2.1 LangChain MCP Client**
+```python
+# local/aichatbot/python/mcp/mcp_client.py
+from langchain.agents import Tool
+from langchain.tools import BaseTool
+from mcp.client import Client
+from mcp.client.stdio import stdio_client
+import asyncio
+import json
+
+class MoodleMCPClient:
+    def __init__(self, config):
+        self.config = config
+        self.client = None
+        self.tools = []
+    
+    async def connect(self):
+        """Kết nối đến MCP server"""
+        try:
+            self.client = await stdio_client(
+                command="python",
+                args=[self.config["mcp_server_path"]]
+            )
+            
+            # Lấy danh sách tools
+            tools_response = await self.client.list_tools()
+            self.tools = tools_response.tools
+            
+            return True
+        except Exception as e:
+            print(f"Error connecting to MCP server: {e}")
+            return False
+    
+    async def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+        """Gọi tool trên MCP server"""
+        try:
+            if not self.client:
+                await self.connect()
+            
+            response = await self.client.call_tool(tool_name, arguments)
+            
+            if response.content:
+                result = json.loads(response.content[0].text)
+                return result
+            else:
+                return {"error": "No response from MCP server"}
+                
+        except Exception as e:
+            return {"error": str(e)}
+    
+    def get_langchain_tools(self) -> List[Tool]:
+        """Chuyển đổi MCP tools thành LangChain tools"""
+        langchain_tools = []
+        
+        for mcp_tool in self.tools:
+            def create_tool_func(tool_name):
+                async def tool_func(**kwargs):
+                    result = await self.call_tool(tool_name, kwargs)
+                    return json.dumps(result, ensure_ascii=False)
+                return tool_func
+            
+            langchain_tool = Tool(
+                name=mcp_tool.name,
+                description=mcp_tool.description,
+                func=create_tool_func(mcp_tool.name)
+            )
+            
+            langchain_tools.append(langchain_tool)
+        
+        return langchain_tools
+
+# Integration với LangChain Agents
+class MoodleMCPTool(BaseTool):
+    """Base tool class cho Moodle MCP integration"""
+    
+    name: str
+    description: str
+    mcp_client: MoodleMCPClient
+    
+    def __init__(self, name: str, description: str, mcp_client: MoodleMCPClient):
+        super().__init__()
+        self.name = name
+        self.description = description
+        self.mcp_client = mcp_client
+    
+    async def _arun(self, **kwargs) -> str:
+        """Async run method"""
+        result = await self.mcp_client.call_tool(self.name, kwargs)
+        return json.dumps(result, ensure_ascii=False)
+    
+    def _run(self, **kwargs) -> str:
+        """Sync run method"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            result = loop.run_until_complete(self._arun(**kwargs))
+            return result
+        finally:
+            loop.close()
+```
+
+### 4.3 MCP Server Configuration
+
+#### **4.3.1 MCP Server Config**
+```python
+# local/aichatbot/python/config/mcp_config.py
+import os
+from typing import Dict, Any
+
+class MCPConfig:
+    def __init__(self):
+        self.config = {
+            "mcp_server": {
+                "name": "moodle-ai-server",
+                "version": "1.0.0",
+                "description": "Moodle AI Agentic MCP Server",
+                "capabilities": {
+                    "tools": True,
+                    "resources": True,
+                    "prompts": True,
+                    "logging": True
+                }
+            },
+            "moodle": {
+                "db_host": os.getenv("MOODLE_DB_HOST", "localhost"),
+                "db_name": os.getenv("MOODLE_DB_NAME", "moodle"),
+                "db_user": os.getenv("MOODLE_DB_USER", "moodle_user"),
+                "db_pass": os.getenv("MOODLE_DB_PASS", "moodle_password"),
+                "base_url": os.getenv("MOODLE_BASE_URL", "http://localhost/moodle")
+            },
+            "ai": {
+                "openai_api_key": os.getenv("OPENAI_API_KEY"),
+                "model": "gpt-4",
+                "temperature": 0.7,
+                "max_tokens": 2000
+            },
+            "rag": {
+                "vector_db_path": os.getenv("VECTOR_DB_PATH", "./vector_db"),
+                "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+                "chunk_size": 1000,
+                "chunk_overlap": 200
+            },
+            "logging": {
+                "level": "INFO",
+                "file": "./logs/mcp_server.log",
+                "max_size": "10MB",
+                "backup_count": 5
+            }
+        }
+    
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get config value"""
+        keys = key.split(".")
+        value = self.config
+        
+        for k in keys:
+            if isinstance(value, dict) and k in value:
+                value = value[k]
+            else:
+                return default
+        
+        return value
+    
+    def get_moodle_config(self) -> Dict[str, Any]:
+        """Get Moodle configuration"""
+        return self.config["moodle"]
+    
+    def get_ai_config(self) -> Dict[str, Any]:
+        """Get AI configuration"""
+        return self.config["ai"]
+    
+    def get_rag_config(self) -> Dict[str, Any]:
+        """Get RAG configuration"""
+        return self.config["rag"]
+```
+
+### 4.4 MCP Server Deployment
+
+#### **4.4.1 Systemd Service**
+```ini
+# /etc/systemd/system/moodle-mcp-server.service
+[Unit]
+Description=Moodle AI MCP Server
+After=network.target
+
+[Service]
+Type=simple
+User=moodle
+Group=moodle
+WorkingDirectory=/var/www/moodle/local/aichatbot/python
+ExecStart=/usr/bin/python3 mcp/mcp_server.py
+Restart=always
+RestartSec=10
+Environment=PYTHONPATH=/var/www/moodle/local/aichatbot/python
+Environment=OPENAI_API_KEY=your_api_key_here
+
+[Install]
+WantedBy=multi-user.target
+```
+
+#### **4.4.2 Docker Configuration**
+```dockerfile
+# local/aichatbot/docker/Dockerfile.mcp
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy MCP server code
+COPY python/ ./python/
+COPY config/ ./config/
+
+# Set environment variables
+ENV PYTHONPATH=/app/python
+ENV MCP_SERVER_PORT=8000
+
+# Expose port
+EXPOSE 8000
+
+# Run MCP server
+CMD ["python", "python/mcp/mcp_server.py"]
+```
+
+#### **4.4.3 Docker Compose**
+```yaml
+# local/aichatbot/docker/docker-compose.yml
+version: '3.8'
+
+services:
+  moodle-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    container_name: moodle-mcp-server
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MOODLE_DB_HOST=${MOODLE_DB_HOST}
+      - MOODLE_DB_NAME=${MOODLE_DB_NAME}
+      - MOODLE_DB_USER=${MOODLE_DB_USER}
+      - MOODLE_DB_PASS=${MOODLE_DB_PASS}
+      - VECTOR_DB_PATH=/app/vector_db
+    volumes:
+      - ./vector_db:/app/vector_db
+      - ./logs:/app/logs
+    restart: unless-stopped
+    depends_on:
+      - moodle-db
+      - redis
+
+  moodle-db:
+    image: mysql:8.0
+    container_name: moodle-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MOODLE_DB_NAME}
+      - MYSQL_USER=${MOODLE_DB_USER}
+      - MYSQL_PASSWORD=${MOODLE_DB_PASS}
+    volumes:
+      - moodle_db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:7-alpine
+    container_name: moodle-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  moodle_db_data:
+  redis_data:
+```
 
 ---
 
-## 🎯 **DEMO SCENARIOS**
+## 5. TÍCH HỢP VỚI MOODLE
 
-### **Demo 1: Học sinh hỏi bài tập Toán với RAG**
-```
-Học sinh: "Tôi không biết giải bài này: x² + 5x + 6 = 0"
-AI Study Agent với RAG:
-1. Tìm kiếm trong Knowledge Base: "phương trình bậc 2"
-2. Tìm thấy tài liệu: "Chương 2: Phương trình bậc 2" (trang 45-60)
-3. Phân tích: Đây là phương trình bậc 2
-4. Hướng dẫn: Sử dụng công thức nghiệm (theo tài liệu trang 47)
-5. Giải từng bước chi tiết
-6. Tạo bài tập tương tự từ tài liệu
-7. Nguồn tham khảo: "Toán học 10, Chương 2, trang 45-60"
-8. Confidence: 95%
+### 4.1 PHP Bridge cho LangChain
+
+```php
+<?php
+// local/aichatbot/python_bridge.php
+require_once("../../config.php");
+
+class LangChainBridge {
+    private $python_path;
+    private $script_path;
+    
+    public function __construct() {
+        $this->python_path = get_config('local_aichatbot', 'python_path') ?: 'python';
+        $this->script_path = __DIR__ . '/python/';
+    }
+    
+    public function call_study_agent($message, $user_id, $course_id) {
+        $script = $this->script_path . 'agents/study_agent.py';
+        $input = json_encode([
+            'action' => 'process_question',
+            'message' => $message,
+            'user_id' => $user_id,
+            'course_id' => $course_id
+        ]);
+        
+        $command = "{$this->python_path} {$script} " . escapeshellarg($input);
+        $output = shell_exec($command);
+        
+        return json_decode($output, true);
+    }
+    
+    public function call_progress_agent($user_id, $course_id) {
+        $script = $this->script_path . 'agents/progress_agent.py';
+        $input = json_encode([
+            'action' => 'analyze_progress',
+            'user_id' => $user_id,
+            'course_id' => $course_id
+        ]);
+        
+        $command = "{$this->python_path} {$script} " . escapeshellarg($input);
+        $output = shell_exec($command);
+        
+        return json_decode($output, true);
+    }
+    
+    public function call_motivation_agent($user_id, $context = 'general') {
+        $script = $this->script_path . 'agents/motivation_agent.py';
+        $input = json_encode([
+            'action' => 'motivate_student',
+            'user_id' => $user_id,
+            'context' => $context
+        ]);
+        
+        $command = "{$this->python_path} {$script} " . escapeshellarg($input);
+        $output = shell_exec($command);
+        
+        return json_decode($output, true);
+    }
+    
+    public function process_rag_query($query, $course_id) {
+        $script = $this->script_path . 'rag/rag_system.py';
+        $input = json_encode([
+            'action' => 'search_content',
+            'query' => $query,
+            'course_id' => $course_id
+        ]);
+        
+        $command = "{$this->python_path} {$script} " . escapeshellarg($input);
+        $output = shell_exec($command);
+        
+        return json_decode($output, true);
+    }
+    
+    public function get_course_files($course_id) {
+        global $DB;
+        
+        $sql = "SELECT f.*, ctx.instanceid as courseid 
+                FROM {files} f 
+                JOIN {context} ctx ON f.contextid = ctx.id 
+                WHERE ctx.contextlevel = ? AND ctx.instanceid = ? 
+                AND f.filename != '.' AND f.filesize > 0";
+        
+        $files = $DB->get_records_sql($sql, [CONTEXT_COURSE, $course_id]);
+        
+        $result = [];
+        foreach ($files as $file) {
+            $file_path = $this->get_file_path($file);
+            if (file_exists($file_path)) {
+                $result[] = [
+                    'id' => $file->id,
+                    'filename' => $file->filename,
+                    'filepath' => $file_path,
+                    'mimetype' => $file->mimetype,
+                    'filesize' => $file->filesize
+                ];
+            }
+        }
+        
+        return $result;
+    }
+    
+    private function get_file_path($file) {
+        global $CFG;
+        
+        $file_path = $CFG->dataroot . '/filedir/' . 
+                    substr($file->contenthash, 0, 2) . '/' . 
+                    substr($file->contenthash, 2, 2) . '/' . 
+                    $file->contenthash;
+        
+        return $file_path;
+    }
+}
+
+// API endpoint
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+    
+    $bridge = new LangChainBridge();
+    
+    switch ($data['action']) {
+        case 'get_course_files':
+            $result = $bridge->get_course_files($data['course_id']);
+            break;
+        case 'call_study_agent':
+            $result = $bridge->call_study_agent(
+                $data['message'], 
+                $data['user_id'], 
+                $data['course_id']
+            );
+            break;
+        case 'call_progress_agent':
+            $result = $bridge->call_progress_agent(
+                $data['user_id'], 
+                $data['course_id']
+            );
+            break;
+        case 'call_motivation_agent':
+            $result = $bridge->call_motivation_agent(
+                $data['user_id'], 
+                $data['context']
+            );
+            break;
+        default:
+            $result = ['error' => 'Invalid action'];
+    }
+    
+    echo json_encode($result);
+}
+?>
 ```
 
-### **Demo 2: AI phân tích tiến độ học tập**
-```
-AI Progress Agent:
-→ Điểm Toán: 8.5 (tăng 0.5)
-→ Điểm Lý: 7.0 (cần cải thiện)
-→ Thời gian học: 5 giờ/ngày
-→ Hiệu quả: 85%
-→ Đề xuất: Tăng thời gian học Lý
-→ Tài liệu cải thiện: "Vật lý 10, Chương 3" (tìm bằng RAG)
-→ Nhắc nhở: "Bạn chưa học Lý hôm nay, hãy dành 1 giờ cho chủ đề Điện từ"
-```
+### 4.2 Moodle Tools cho LangChain
 
-### **Demo 3: AI động viên khi học sinh gặp khó khăn**
-```
-Học sinh: "Tôi chán học quá, muốn bỏ cuộc"
-AI Motivation Agent:
-1. Thấu hiểu: "Tôi hiểu bạn đang gặp khó khăn"
-2. Động viên: "Bạn đã học được 80% chương trình"
-3. Đặt mục tiêu: "Hãy thử học 30 phút nữa"
-4. Tạo hứng thú: "Tôi sẽ tạo game học tập"
-5. Tài liệu động viên: "Câu chuyện thành công" (tìm bằng RAG)
-```
+```python
+# local/aichatbot/python/tools/moodle_tools.py
+import subprocess
+import json
+from typing import Dict, List, Any
 
-### **Demo 4: RAG System hoạt động**
-```
-Học sinh: "Cách tính diện tích hình tròn?"
-AI Study Agent với RAG:
-1. RAG Pipeline khởi động
-2. Retrieve: Tìm kiếm "diện tích hình tròn" trong vector database
-3. Tìm thấy 3 tài liệu liên quan:
-   - "Hình học 9, Chương 2" (trang 45-60)
-   - "Bài tập hình học" (trang 12-25)
-   - "Công thức toán học" (trang 8-15)
-4. Generate: Tạo câu trả lời dựa trên context
-5. Kết quả: 
-   - Công thức: S = π × r²
-   - Giải thích từ tài liệu
-   - Ví dụ cụ thể
-   - Bài tập luyện tập
-6. Nguồn tham khảo: 3 tài liệu trên
-7. Confidence: 98%
+class MoodleTools:
+    def __init__(self, config):
+        self.config = config
+        self.bridge_script = config["bridge_script_path"]
+    
+    def get_student_info(self, user_id: int, course_id: int) -> Dict[str, Any]:
+        """Lấy thông tin học viên"""
+        result = self._call_php_bridge("get_student_info", {
+            "user_id": user_id,
+            "course_id": course_id
+        })
+        return result
+    
+    def get_user_progress(self, user_id: int, course_id: int = None) -> Dict[str, Any]:
+        """Lấy tiến độ học viên"""
+        result = self._call_php_bridge("get_user_progress", {
+            "user_id": user_id,
+            "course_id": course_id
+        })
+        return result
+    
+    def get_course_content(self, course_id: int) -> List[Dict[str, Any]]:
+        """Lấy nội dung khóa học"""
+        result = self._call_php_bridge("get_course_content", {
+            "course_id": course_id
+        })
+        return result
+    
+    def get_quiz_results(self, user_id: int, course_id: int) -> List[Dict[str, Any]]:
+        """Lấy kết quả quiz"""
+        result = self._call_php_bridge("get_quiz_results", {
+            "user_id": user_id,
+            "course_id": course_id
+        })
+        return result
+    
+    def get_assignment_submissions(self, user_id: int, course_id: int) -> List[Dict[str, Any]]:
+        """Lấy bài nộp assignment"""
+        result = self._call_php_bridge("get_assignment_submissions", {
+            "user_id": user_id,
+            "course_id": course_id
+        })
+        return result
+    
+    def get_forum_participation(self, user_id: int, course_id: int) -> Dict[str, Any]:
+        """Lấy tham gia forum"""
+        result = self._call_php_bridge("get_forum_participation", {
+            "user_id": user_id,
+            "course_id": course_id
+        })
+        return result
+    
+    def create_learning_activity(self, user_id: int, activity_data: Dict[str, Any]) -> bool:
+        """Tạo hoạt động học tập"""
+        result = self._call_php_bridge("create_learning_activity", {
+            "user_id": user_id,
+            "activity_data": activity_data
+        })
+        return result.get("success", False)
+    
+    def send_notification(self, user_id: int, message: str, type: str = "info") -> bool:
+        """Gửi thông báo"""
+        result = self._call_php_bridge("send_notification", {
+            "user_id": user_id,
+            "message": message,
+            "type": type
+        })
+        return result.get("success", False)
+    
+    def _call_php_bridge(self, action: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Gọi PHP bridge"""
+        input_data = {
+            "action": action,
+            **data
+        }
+        
+        try:
+            result = subprocess.run([
+                "php",
+                self.bridge_script,
+                json.dumps(input_data)
+            ], capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0:
+                return json.loads(result.stdout)
+            else:
+                return {"error": result.stderr}
+                
+        except subprocess.TimeoutExpired:
+            return {"error": "Request timeout"}
+        except Exception as e:
+            return {"error": str(e)}
 ```
 
 ---
 
-## 📅 **KẾ HOẠCH THỰC HIỆN (3 THÁNG)**
+## 5. ROADMAP TRIỂN KHAI
 
-### **Tháng 1: Nghiên cứu và thiết kế**
-**Tuần 1-2: Nghiên cứu sâu và phân tích**
-- Nghiên cứu sâu Agentic AI và Multi-Agent Systems
-- Nghiên cứu LangChain Framework chi tiết
-- Nghiên cứu MCP Server và Model Context Protocol
-- Nghiên cứu Vector Databases và Embeddings
-- Nghiên cứu RAG System và ứng dụng
-- Phân tích các hệ thống AI hiện có
-- Phân tích UX/UI cho hệ thống AI
-- Thiết kế kiến trúc hệ thống
-- Thiết kế giao diện người dùng
+### 5.1 Giai đoạn 1: Chuẩn bị (Tuần 1-2)
 
-**Tuần 3-4: Thiết kế chi tiết và chuẩn bị**
-- Thiết kế chi tiết các AI Agents
-- Thiết kế MCP Server architecture
-- Thiết kế RAG System architecture
-- Thiết kế cơ sở dữ liệu
-- Thiết kế chi tiết giao diện
-- Thiết kế user flow và wireframe
-- Thiết kế API và giao tiếp
-- Chuẩn bị môi trường phát triển
-- Chuẩn bị môi trường frontend
+#### **Tuần 1:**
+- [ ] Cài đặt Python environment
+- [ ] Cài đặt LangChain và dependencies
+- [ ] Thiết lập OpenAI API key
+- [ ] Tạo cấu trúc thư mục
 
-### **Tháng 2: Phát triển core system**
-**Tuần 5-6: Phát triển Study Agent và Progress Agent**
-- Tạo Study Agent với LangChain
-- Tạo Progress Agent cơ bản
-- Tích hợp với OpenAI API
-- Tạo cơ sở dữ liệu
-- Tạo giao diện chat cơ bản
-- Tạo giao diện hiển thị tiến độ
-- Tích hợp với backend API
-- Tạo responsive design
-- **Tích hợp RAG System cơ bản**
-- **Tạo Vector Database cho tài liệu**
+#### **Tuần 2:**
+- [ ] Tạo PHP bridge cơ bản
+- [ ] Thiết lập vector database
+- [ ] Tạo database schema mới
+- [ ] Testing kết nối Python-PHP
 
-**Tuần 7-8: Phát triển Motivation Agent và MCP Server**
-- Tạo Motivation Agent
-- Tạo MCP Server cơ bản
-- Tích hợp các Agent với nhau
-- Tạo Student Coordinator
-- Tạo giao diện cho Motivation Agent
-- Tạo dashboard tổng quan
-- Tích hợp với MCP Server
-- Tối ưu hóa giao diện
+### 5.2 Giai đoạn 2: RAG System (Tuần 3-4)
 
-### **Tháng 3: Tích hợp dữ liệu và chuẩn bị trình bày**
-**Tuần 9-10: Tích hợp dữ liệu khóa học**
-- Tạo Course Data Extractor
-- Tích hợp với Moodle database
-- Tạo Knowledge Base
-- Tích hợp với AI Agents
-- Tạo giao diện quản lý khóa học
-- Tạo giao diện hiển thị tài liệu
-- Tích hợp với Knowledge Base
-- Tạo giao diện tìm kiếm
-- **Hoàn thiện RAG System**
-- **Tối ưu hóa Vector Database**
-- **Tích hợp RAG với tất cả AI Agents**
+#### **Tuần 3:**
+- [ ] Implement Document Processor
+- [ ] Tạo Vector Database Manager
+- [ ] Xử lý tài liệu Moodle
+- [ ] Testing RAG pipeline
 
-**Tuần 11-12: Hoàn thiện và chuẩn bị trình bày**
-- Hoàn thiện tất cả AI Agents
-- Tối ưu hóa hiệu suất
-- Tạo demo scenarios
-- Chuẩn bị tài liệu kỹ thuật
-- Hoàn thiện giao diện
-- Tối ưu hóa UX/UI
-- Tạo presentation slides
-- Chuẩn bị demo videos
+#### **Tuần 4:**
+- [ ] Tối ưu hóa embeddings
+- [ ] Implement similarity search
+- [ ] Tạo QA chains
+- [ ] Testing với dữ liệu thực
 
----
+### 5.3 Giai đoạn 3: AI Agents (Tuần 5-7)
 
-## 🎁 **SẢN PHẨM DEMO SAU 3 THÁNG**
+#### **Tuần 5:**
+- [ ] Implement Study Agent
+- [ ] Tạo tools cho Study Agent
+- [ ] Testing Study Agent
+- [ ] Tích hợp với RAG
 
-### **Hệ thống AI Chatbot hoàn chỉnh**
-- ✅ **Study Agent:** Giải bài tập, giải thích khái niệm, tạo bài tập luyện tập
-- ✅ **Progress Agent:** Theo dõi tiến độ, phân tích điểm mạnh/yếu, đề xuất cải thiện
-- ✅ **Motivation Agent:** Tạo động lực học tập, động viên khi gặp khó khăn
-- ✅ **Student Coordinator:** Quản lý các Agent, phân phối nhiệm vụ
+#### **Tuần 6:**
+- [ ] Implement Progress Agent
+- [ ] Tạo analytics engine
+- [ ] Testing Progress Agent
+- [ ] Tích hợp với Moodle data
 
-### **Giao diện người dùng hoàn chỉnh**
-- ✅ **Chat Interface:** Giao diện chat thân thiện, real-time communication
-- ✅ **Dashboard:** Hiển thị tiến độ học tập, biểu đồ và thống kê
-- ✅ **Course Management:** Quản lý khóa học và tài liệu
-- ✅ **Progress Tracking:** Theo dõi và phân tích tiến độ
+#### **Tuần 7:**
+- [ ] Implement Motivation Agent
+- [ ] Tạo gamification engine
+- [ ] Testing Motivation Agent
+- [ ] Tích hợp với user preferences
 
-### **Tích hợp dữ liệu khóa học**
-- ✅ **Course Data Extractor:** Tự động lấy dữ liệu từ Moodle
-- ✅ **Knowledge Base:** Cơ sở tri thức từ tài liệu khóa học
-- ✅ **Smart Search với RAG:** Tìm kiếm thông minh trong tài liệu
-- ✅ **Context Awareness:** Hiểu ngữ cảnh học tập
+### 5.4 Giai đoạn 4: Integration (Tuần 8-9)
 
-### **Tính năng phân tích thời gian học**
-- ✅ **Theo dõi thời gian học theo chủ đề**
-- ✅ **Nhắc nhở học tập thông minh**
-- ✅ **Đề xuất lịch học cá nhân hóa**
-- ✅ **Báo cáo tiến độ chi tiết**
+#### **Tuần 8:**
+- [ ] Tích hợp tất cả agents
+- [ ] Tạo Student Coordinator
+- [ ] Testing end-to-end
+- [ ] Tối ưu hóa performance
+
+#### **Tuần 9:**
+- [ ] Cập nhật giao diện Moodle
+- [ ] Tạo agent selector
+- [ ] Implement real-time chat
+- [ ] Testing user experience
+
+### 5.5 Giai đoạn 5: Testing & Deployment (Tuần 10-12)
+
+#### **Tuần 10:**
+- [ ] Unit testing
+- [ ] Integration testing
+- [ ] Performance testing
+- [ ] Security testing
+
+#### **Tuần 11:**
+- [ ] User acceptance testing
+- [ ] Bug fixes
+- [ ] Documentation
+- [ ] Training materials
+
+#### **Tuần 12:**
+- [ ] Production deployment
+- [ ] Monitoring setup
+- [ ] User training
+- [ ] Go-live support
 
 ---
 
-## 💡 **TÍNH MỚI VÀ ĐÓNG GÓP**
+## 6. CẤU HÌNH VÀ DEPLOYMENT
 
-### **Tính mới:**
-- ✅ **AI Agentic đầu tiên cho học sinh Việt Nam**
-- ✅ **Tích hợp LangChain + MCP + RAG**
-- ✅ **Hệ thống tìm kiếm thông minh trong tài liệu**
-- ✅ **Phân tích thời gian học theo chủ đề**
-- ✅ **Nhắc nhở học tập thông minh**
+### 6.1 Requirements
 
-### **Đóng góp:**
-- ✅ **Cải thiện chất lượng học tập**
-- ✅ **Hỗ trợ học sinh 24/7**
-- ✅ **Độ chính xác cao với RAG**
-- ✅ **Nguồn tham khảo rõ ràng**
-- ✅ **Quản lý thời gian học tập hiệu quả**
+#### **Python Dependencies:**
+```txt
+# requirements.txt
+langchain==0.1.0
+openai==1.3.0
+chromadb==0.4.18
+sentence-transformers==2.2.2
+numpy==1.24.3
+pandas==2.0.3
+scikit-learn==1.3.0
+python-dotenv==1.0.0
+```
+
+#### **PHP Extensions:**
+- PHP 8.0+
+- JSON extension
+- cURL extension
+- MySQL/PostgreSQL extension
+
+#### **System Requirements:**
+- RAM: 8GB+ (16GB recommended)
+- Storage: 50GB+ for vector database
+- CPU: 4 cores+ (8 cores recommended)
+
+### 6.2 Configuration
+
+#### **Environment Variables:**
+```bash
+# .env
+OPENAI_API_KEY=your_openai_api_key
+MOODLE_DB_HOST=localhost
+MOODLE_DB_NAME=moodle
+MOODLE_DB_USER=moodle_user
+MOODLE_DB_PASS=moodle_password
+VECTOR_DB_PATH=/path/to/vector/database
+PYTHON_PATH=/usr/bin/python3
+```
+
+#### **Moodle Settings:**
+```php
+// config.php additions
+$CFG->local_aichatbot_enabled = true;
+$CFG->local_aichatbot_openai_key = 'your_key';
+$CFG->local_aichatbot_vector_db_path = '/path/to/vector/db';
+$CFG->local_aichatbot_python_path = '/usr/bin/python3';
+```
+
+### 6.3 Monitoring và Maintenance
+
+#### **Logging:**
+```python
+# local/aichatbot/python/utils/logger.py
+import logging
+import os
+from datetime import datetime
+
+class MoodleAILogger:
+    def __init__(self, log_dir="./logs"):
+        self.log_dir = log_dir
+        os.makedirs(log_dir, exist_ok=True)
+        
+        # Setup logging
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(f"{log_dir}/moodle_ai_{datetime.now().strftime('%Y%m%d')}.log"),
+                logging.StreamHandler()
+            ]
+        )
+        
+        self.logger = logging.getLogger('MoodleAI')
+    
+    def log_agent_interaction(self, agent_type, user_id, action, result):
+        """Log agent interactions"""
+        self.logger.info(f"Agent: {agent_type}, User: {user_id}, Action: {action}, Result: {result}")
+    
+    def log_rag_query(self, query, course_id, results_count, response_time):
+        """Log RAG queries"""
+        self.logger.info(f"RAG Query: {query[:100]}..., Course: {course_id}, Results: {results_count}, Time: {response_time}ms")
+    
+    def log_error(self, error_type, error_message, context=None):
+        """Log errors"""
+        self.logger.error(f"Error: {error_type}, Message: {error_message}, Context: {context}")
+```
+
+#### **Performance Monitoring:**
+```python
+# local/aichatbot/python/utils/monitor.py
+import time
+import psutil
+import json
+from datetime import datetime
+
+class PerformanceMonitor:
+    def __init__(self):
+        self.metrics = {}
+    
+    def start_timer(self, operation_name):
+        """Bắt đầu đo thời gian"""
+        self.metrics[operation_name] = {
+            'start_time': time.time(),
+            'start_memory': psutil.Process().memory_info().rss
+        }
+    
+    def end_timer(self, operation_name):
+        """Kết thúc đo thời gian"""
+        if operation_name in self.metrics:
+            end_time = time.time()
+            end_memory = psutil.Process().memory_info().rss
+            
+            self.metrics[operation_name].update({
+                'end_time': end_time,
+                'end_memory': end_memory,
+                'duration': end_time - self.metrics[operation_name]['start_time'],
+                'memory_used': end_memory - self.metrics[operation_name]['start_memory']
+            })
+            
+            return self.metrics[operation_name]
+        return None
+    
+    def get_system_stats(self):
+        """Lấy thống kê hệ thống"""
+        return {
+            'cpu_percent': psutil.cpu_percent(),
+            'memory_percent': psutil.virtual_memory().percent,
+            'disk_usage': psutil.disk_usage('/').percent,
+            'timestamp': datetime.now().isoformat()
+        }
+    
+    def save_metrics(self, filepath):
+        """Lưu metrics"""
+        with open(filepath, 'w') as f:
+            json.dump(self.metrics, f, indent=2)
+```
 
 ---
 
-## 📊 **METRICS VÀ ĐÁNH GIÁ**
+## 7. KẾT LUẬN
 
-### **Technical Metrics**
-- **Response Time:** < 5 giây
-- **Accuracy:** > 90%
-- **Uptime:** > 99.9%
-- **RAG Confidence:** > 80%
+Kế hoạch triển khai AI Agentic trong Moodle sử dụng LangChain sẽ tạo ra một hệ thống "gia sư ảo" thông minh với các đặc điểm:
 
-### **Educational Metrics**
-- **Student Satisfaction:** > 4.5/5
-- **Learning Improvement:** Tăng 20% điểm số
-- **Engagement:** Tăng 30% thời gian học
-- **Completion Rate:** > 85%
+### **7.1 Lợi ích chính:**
+- **Học tập cá nhân hóa**: AI điều chỉnh nội dung theo từng học viên
+- **Hỗ trợ 24/7**: Học viên có thể học bất cứ lúc nào
+- **Theo dõi tiến độ thông minh**: Phân tích và dự đoán hiệu suất
+- **Động viên học tập**: Gamification và khuyến khích tích cực
+- **Tích hợp sâu**: Tận dụng toàn bộ dữ liệu Moodle
 
-### **System Metrics**
-- **Concurrent Users:** 100+ học sinh
-- **Documents Processed:** 1000+ tài liệu
-- **Queries per Day:** 500+ câu hỏi
-- **Storage:** 10GB+ vector database
+### **7.2 Tính khả thi:**
+- ✅ **Kỹ thuật**: LangChain cung cấp framework hoàn chỉnh
+- ✅ **Tích hợp**: Moodle plugin architecture linh hoạt
+- ✅ **Dữ liệu**: Tận dụng dữ liệu có sẵn trong Moodle
+- ✅ **Mở rộng**: Dễ dàng thêm agents và tính năng mới
 
----
+### **7.3 ROI dự kiến:**
+- **Tăng engagement**: 40-60% học viên tích cực hơn
+- **Cải thiện kết quả**: 20-30% điểm số cao hơn
+- **Giảm dropout**: 25-35% tỷ lệ bỏ học thấp hơn
+- **Tiết kiệm thời gian**: 50-70% thời gian hỗ trợ giảng viên
 
-## 🚀 **KẾT LUẬN**
-
-Đây là một đồ án sáng tạo và thực tế, kết hợp các công nghệ AI tiên tiến để tạo ra một hệ thống hỗ trợ học sinh thông minh. Với việc tích hợp vào Moodle, hệ thống sẽ tận dụng được cơ sở hạ tầng có sẵn và dễ dàng triển khai trong thực tế.
-
-### **Điểm mạnh:**
-- ✅ **Tính mới:** AI Agentic đầu tiên cho học sinh Việt Nam
-- ✅ **Ứng dụng thực tế:** Tích hợp với Moodle hiện có
-- ✅ **Công nghệ tiên tiến:** LangChain + MCP + RAG
-- ✅ **Độ chính xác cao:** RAG System với nguồn tham khảo
-- ✅ **Khả năng mở rộng:** Kiến trúc modular
-- ✅ **Quản lý thời gian:** Phân tích và nhắc nhở học tập thông minh
-
-### **Thách thức:**
-- ⚠️ **Độ phức tạp kỹ thuật:** Tích hợp nhiều công nghệ AI
-- ⚠️ **Thời gian phát triển:** 3 tháng cho prototype
-- ⚠️ **Tài nguyên:** Cần GPU cho embeddings
-- ⚠️ **Dữ liệu:** Cần tài liệu khóa học đa dạng
-
-### **Tiềm năng:**
-- 🚀 **Mở rộng:** Áp dụng cho nhiều môn học
-- 🚀 **Thương mại hóa:** Bán cho các trường học
-- 🚀 **Nghiên cứu:** Phát triển thành platform
-- 🚀 **Quốc tế:** Mở rộng ra thị trường quốc tế
-
----
-
-## 📚 **TÀI LIỆU THAM KHẢO**
-
-### **Tài liệu kỹ thuật**
-1. **Agentic AI:** "Artificial Intelligence: A Modern Approach" - Russell & Norvig
-2. **LangChain:** LangChain Documentation, "Building LLM Applications with LangChain"
-3. **MCP Server:** Model Context Protocol Specification
-4. **RAG System:** "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"
-
-### **Tài liệu giáo dục**
-1. **AI in Education:** "Artificial Intelligence in Education" - Luckin et al.
-2. **Educational Technology:** "Educational Technology: A Definition" - AECT
-
-### **Tài liệu tham khảo khác**
-1. **Software Engineering:** "Clean Architecture" - Robert Martin
-2. **Research Methods:** "Research Methods in Education" - Cohen et al.
-
----
-
-**Đây là một đồ án có tiềm năng lớn và có thể tạo ra tác động tích cực trong lĩnh vực giáo dục!**
-
-**Tổng kết:**
-- ✅ **Ý tưởng sáng tạo:** AI Agentic cho học sinh
-- ✅ **Kiến trúc hoàn chỉnh:** LangChain + MCP + RAG
-- ✅ **Tính năng đầy đủ:** Study, Progress, Motivation Agents
-- ✅ **Công nghệ tiên tiến:** Vector Database, Embeddings
-- ✅ **Kế hoạch chi tiết:** 3 tháng implementation
-- ✅ **Demo scenarios:** 4 demo hoàn chỉnh
-- ✅ **Tài liệu kỹ thuật:** API, Database, Deployment
-- ✅ **Tính năng đặc biệt:** Phân tích thời gian học và nhắc nhở thông minh
-
-
-
-
-
+**Kế hoạch này sẽ biến Moodle thành một nền tảng học tập thông minh, nơi AI không chỉ hỗ trợ mà còn thúc đẩy việc học tập hiệu quả cho mọi học viên.**
