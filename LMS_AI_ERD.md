@@ -137,9 +137,3 @@ erDiagram
 - **Quiz (4 bảng):** QUESTION_BANK, QUIZ, QUIZ_QUESTION, STUDENT_ATTEMPT
 - **Chat (2 bảng):** CHAT_SESSION, CHAT_MESSAGE
 
-
-### **Lợi ích của cấu trúc này:**
-- ✅ Đơn giản hơn (bỏ layer LESSON)
-- ✅ TOPIC vừa là đơn vị nội dung, vừa là micro learning unit
-- ✅ Mỗi topic = 1 khái niệm cụ thể = 1 bài học ngắn
-- ✅ Dễ quản lý và triển khai
