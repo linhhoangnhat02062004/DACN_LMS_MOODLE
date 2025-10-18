@@ -1,6 +1,6 @@
-    # TỔNG QUAN HỆ THỐNG LMS HỖ TRỢ AI
+# TỔNG QUAN HỆ THỐNG LMS HỖ TRỢ AI
 
-    ## 1. Giới thiệu
+## 1. Giới thiệu
 
 ### **Tên dự án**
 **AI Chatbot Plugin for Moodle** - Plugin AI Chatbot tích hợp vào Moodle
@@ -850,4 +850,5 @@ MOODLE (Có sẵn) + AI CHATBOT PLUGIN (Phát triển)
 - 🌍 Mở rộng - Dùng cho bất kỳ Moodle nào
 
 Hệ thống tập trung vào việc **phát triển AI Chatbot plugin** tích hợp vào Moodle, không phát triển lại LMS! 🚀💬
+
 
