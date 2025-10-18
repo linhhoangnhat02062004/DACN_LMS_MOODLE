@@ -1,5 +1,6 @@
 # ERD - Hệ thống Quản lý Học tập (LMS) hỗ trợ AI
 
+## Sơ đồ ERD
 
 ```mermaid
 erDiagram
@@ -33,12 +34,13 @@ erDiagram
         datetime enrollment_date
     }
 
-    LESSON {
-        int lesson_id PK
+    TOPIC {
+        int topic_id PK
         int course_id FK
-        string lesson_name
-        text content
+        string topic_name
+        text content "nội dung bài học micro learning"
         int order_number
+        int duration_minutes "5-15 phút"
         datetime created_at
     }
 
@@ -46,6 +48,7 @@ erDiagram
     QUESTION_BANK {
         int question_id PK
         int course_id FK
+        int topic_id FK
         int created_by FK
         enum question_type "multiple_choice, true_false, essay"
         text question_text
@@ -59,7 +62,7 @@ erDiagram
     QUIZ {
         int quiz_id PK
         int course_id FK
-        int lesson_id FK
+        int topic_id FK
         string quiz_name
         int duration_minutes
         datetime start_time
@@ -90,6 +93,7 @@ erDiagram
         int session_id PK
         int student_id FK
         int course_id FK
+        int topic_id FK "optional - chat về topic cụ thể"
         datetime created_at
     }
 
@@ -105,12 +109,13 @@ erDiagram
     USER ||--o{ COURSE : "teaches"
     USER ||--o{ ENROLLMENT : "enrolls"
     COURSE ||--o{ ENROLLMENT : "has"
-    COURSE ||--o{ LESSON : "contains"
+    COURSE ||--o{ TOPIC : "contains"
     
     %% Relationships - Quiz
     COURSE ||--o{ QUESTION_BANK : "has"
+    TOPIC ||--o{ QUESTION_BANK : "relates_to"
     COURSE ||--o{ QUIZ : "has"
-    LESSON ||--o{ QUIZ : "includes"
+    TOPIC ||--o{ QUIZ : "includes"
     USER ||--o{ QUESTION_BANK : "creates"
     
     QUIZ ||--o{ QUIZ_QUESTION : "contains"
@@ -121,13 +126,20 @@ erDiagram
     %% Relationships - AI Chat
     USER ||--o{ CHAT_SESSION : "initiates"
     COURSE ||--o{ CHAT_SESSION : "relates_to"
+    TOPIC ||--o{ CHAT_SESSION : "focuses_on"
     CHAT_SESSION ||--o{ CHAT_MESSAGE : "contains"
 ```
-
 
 ## Tổng kết
 
 ### **Phân loại bảng (10 bảng):**
-- **Core (4 bảng):** USER, COURSE, ENROLLMENT, LESSON
+- **Core (4 bảng):** USER, COURSE, ENROLLMENT, TOPIC
 - **Quiz (4 bảng):** QUESTION_BANK, QUIZ, QUIZ_QUESTION, STUDENT_ATTEMPT
 - **Chat (2 bảng):** CHAT_SESSION, CHAT_MESSAGE
+
+
+### **Lợi ích của cấu trúc này:**
+- ✅ Đơn giản hơn (bỏ layer LESSON)
+- ✅ TOPIC vừa là đơn vị nội dung, vừa là micro learning unit
+- ✅ Mỗi topic = 1 khái niệm cụ thể = 1 bài học ngắn
+- ✅ Dễ quản lý và triển khai
