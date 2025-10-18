@@ -1,5 +1,6 @@
 # ERD - Hệ thống Quản lý Học tập (LMS) hỗ trợ AI
 
+
 ```mermaid
 erDiagram
     %% Core Entities
@@ -38,23 +39,6 @@ erDiagram
         string lesson_name
         text content
         int order_number
-        datetime created_at
-    }
-
-    %% AI Components
-    AI_MODEL {
-        int model_id PK
-        string model_name "GPT-4, Gemini, Grok"
-        string provider "OpenAI, Google, xAI"
-        string api_key
-        boolean is_active
-    }
-
-    LANGCHAIN_PROMPT {
-        int prompt_id PK
-        string prompt_name
-        enum prompt_type "question_generation, tutoring"
-        text prompt_template
         datetime created_at
     }
 
@@ -106,7 +90,6 @@ erDiagram
         int session_id PK
         int student_id FK
         int course_id FK
-        int model_id FK
         datetime created_at
     }
 
@@ -138,24 +121,13 @@ erDiagram
     %% Relationships - AI Chat
     USER ||--o{ CHAT_SESSION : "initiates"
     COURSE ||--o{ CHAT_SESSION : "relates_to"
-    AI_MODEL ||--o{ CHAT_SESSION : "powers"
     CHAT_SESSION ||--o{ CHAT_MESSAGE : "contains"
 ```
 
----
 
 ## Tổng kết
 
-### **Phân loại bảng:**
+### **Phân loại bảng (10 bảng):**
 - **Core (4 bảng):** USER, COURSE, ENROLLMENT, LESSON
-- **AI (2 bảng):** AI_MODEL, LANGCHAIN_PROMPT
 - **Quiz (4 bảng):** QUESTION_BANK, QUIZ, QUIZ_QUESTION, STUDENT_ATTEMPT
 - **Chat (2 bảng):** CHAT_SESSION, CHAT_MESSAGE
-
-### **Tính năng chính:**
-1. ✅ Quản lý người dùng và khóa học
-2. ✅ Tích hợp Moodle
-3. ✅ AI sinh câu hỏi tự động
-4. ✅ Quiz và đánh giá
-5. ✅ AI Tutor chatbot
-6. ✅ Hỗ trợ nhiều AI models
